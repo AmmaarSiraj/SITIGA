@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'detail/news_detail.dart';
 import '../components/appbar.dart';
 import './news_service.dart';
+import 'news_header.dart'; // Import header berita
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -15,8 +16,6 @@ class _NewsListScreenState extends State<NewsListScreen> {
   int currentPage = 1;
   int totalPages = 1;
   final int itemsPerPage = 10;
-  bool isDarkMode = false;
-  String selectedLanguage = 'IDN';
 
   @override
   void initState() {
@@ -25,29 +24,28 @@ class _NewsListScreenState extends State<NewsListScreen> {
   }
 
   Future<void> fetchNews(int page) async {
-  if (cachedNews.containsKey(page)) {
-    setState(() {
-      newsList = cachedNews[page]!;
-      isLoading = false;
-    });
-    return;
+    if (cachedNews.containsKey(page)) {
+      setState(() {
+        newsList = cachedNews[page]!;
+        isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final fetchedList = await NewsService.fetchNews(page);
+      cachedNews[page] = fetchedList;
+
+      setState(() {
+        newsList = fetchedList;
+        totalPages = (fetchedList.length / itemsPerPage).ceil();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      print("Error fetching data: $e");
+    }
   }
-
-  try {
-    final fetchedList = await NewsService.fetchNews(page);
-    cachedNews[page] = fetchedList;
-
-    setState(() {
-      newsList = fetchedList;
-      totalPages = (fetchedList.length / itemsPerPage).ceil(); // bisa disesuaikan
-      isLoading = false;
-    });
-  } catch (e) {
-    setState(() => isLoading = false);
-    print("Error fetching data: $e");
-  }
-}
-
 
   void changePage(int page) {
     setState(() {
@@ -62,84 +60,81 @@ class _NewsListScreenState extends State<NewsListScreen> {
     return Scaffold(
       appBar: buildAppBar(),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: (newsList.length / 2).ceil() + 1, // +1 for pagination
-              itemBuilder: (context, index) {
-                if (index < (newsList.length / 2).ceil()) {
-                  final firstIndex = index * 2;
-                  final secondIndex = firstIndex + 1;
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                const NewsHeader(), // Tambahkan header berita
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: (newsList.length / 2).ceil() + 1,
+                    itemBuilder: (context, index) {
+                      if (index < (newsList.length / 2).ceil()) {
+                        final firstIndex = index * 2;
+                        final secondIndex = firstIndex + 1;
 
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                    child: Row(
-                      children: [
-                        // First card
-                        Expanded(
-                          child: NewsCard(
-                            news: newsList[firstIndex],
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NewsDetailScreen(
-                                    newsId: newsList[firstIndex]['news_id']
-                                        .toString(),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        // Second card, check if exists
-                        Expanded(
-                          child: secondIndex < newsList.length
-                              ? NewsCard(
-                                  news: newsList[secondIndex],
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: NewsCard(
+                                  news: newsList[firstIndex],
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => NewsDetailScreen(
-                                          newsId: newsList[secondIndex]
-                                                  ['news_id']
-                                              .toString(),
+                                          newsId: newsList[firstIndex]['news_id'].toString(),
                                         ),
                                       ),
                                     );
                                   },
-                                )
-                              : Container(),
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  // Pagination bar
-                  return Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_back),
-                          onPressed: currentPage > 1
-                              ? () => changePage(currentPage - 1)
-                              : null,
-                        ),
-                        Text("Page $currentPage of $totalPages"),
-                        IconButton(
-                          icon: Icon(Icons.arrow_forward),
-                          onPressed: currentPage < totalPages
-                              ? () => changePage(currentPage + 1)
-                              : null,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: secondIndex < newsList.length
+                                    ? NewsCard(
+                                        news: newsList[secondIndex],
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => NewsDetailScreen(
+                                                newsId: newsList[secondIndex]['news_id'].toString(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : Container(),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                onPressed: currentPage > 1 ? () => changePage(currentPage - 1) : null,
+                              ),
+                              Text("Page $currentPage of $totalPages"),
+                              IconButton(
+                                icon: const Icon(Icons.arrow_forward),
+                                onPressed: currentPage < totalPages ? () => changePage(currentPage + 1) : null,
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
     );
   }
@@ -156,17 +151,15 @@ class NewsCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Card(
-        color: Colors.white, // Bisa diubah kalau mau transparan/beda
+        color: Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
             news['picture'] != null
                 ? ClipRRect(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                     child: Image.network(
                       news['picture'],
                       height: 120,
@@ -178,28 +171,27 @@ class NewsCard extends StatelessWidget {
                     height: 120,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                     ),
                   ),
             Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     news['title']?.toString() ?? "No Title",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     news['rl_date']?.toString() ?? "Unknown Date",
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
-                  SizedBox(height: 8),
-                  Row(
+                  const SizedBox(height: 8),
+                  const Row(
                     children: [
                       Spacer(),
                       Icon(Icons.share, size: 16, color: Colors.grey),
