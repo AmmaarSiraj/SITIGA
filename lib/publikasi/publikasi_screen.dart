@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../components/appbar.dart';
-// import 'publikasi_service.dart';
 import '../publikasi/publikasi_grid.dart';
 import 'publikasi_header.dart';
 import 'publikasi_pencarian_filter.dart';
-import 'tombol_sebelum_sesudah.dart';
 import 'package:provider/provider.dart';
 import '../providers/data_provider.dart';
-
 
 class PublicationListScreen extends StatefulWidget {
   @override
@@ -21,6 +18,7 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
 
   bool isLoading = true;
   int currentPage = 1;
+  int totalPages = 1;
   final int itemsPerPage = 12;
   String searchQuery = "";
   String selectedFilter = "Semua";
@@ -32,20 +30,20 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
   }
 
   Future<void> fetchAndCachePublications(String category) async {
-  final allData = Provider.of<DataProvider>(context, listen: false).allPublications;
+    final allData = Provider.of<DataProvider>(context, listen: false).allPublications;
 
-  final filtered = category == "Semua"
-      ? allData
-      : allData.where((item) => item['category'] == category).toList();
+    final filtered = category == "Semua"
+        ? allData
+        : allData.where((item) => item['category'] == category).toList();
 
-  cachedPublications[category] = filtered;
+    cachedPublications[category] = filtered;
 
-  setState(() {
-    filteredPublications = applySearch(filtered);
-    isLoading = false;
-  });
-}
-
+    setState(() {
+      filteredPublications = applySearch(filtered);
+      totalPages = (filteredPublications.length / itemsPerPage).ceil();
+      isLoading = false;
+    });
+  }
 
   List<Map<String, dynamic>> applySearch(List<Map<String, dynamic>> data) {
     return data.where((pub) {
@@ -62,6 +60,17 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     });
     fetchAndCachePublications(selectedFilter);
     currentPage = 1;
+  }
+
+  void changePage(int page) {
+    setState(() {
+      currentPage = page;
+    });
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -90,6 +99,7 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                       searchQuery = value;
                       filteredPublications = applySearch(
                           cachedPublications[selectedFilter] ?? []);
+                      totalPages = (filteredPublications.length / itemsPerPage).ceil();
                       currentPage = 1;
                     });
                   },
@@ -107,20 +117,44 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                           publications: pagedPublications,
                           scrollController: _scrollController,
                         ),
-                        TombolSebelumSesudah(
-                          currentPage: currentPage,
-                          maxPage: (filteredPublications.length / itemsPerPage)
-                              .ceil(),
-                          onPageChanged: (newPage) {
-                            setState(() {
-                              currentPage = newPage;
-                            });
-                            _scrollController.animateTo(
-                              0,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeOut,
-                            );
-                          },
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                onPressed: currentPage > 1
+                                    ? () => changePage(currentPage - 1)
+                                    : null,
+                              ),
+                              const SizedBox(width: 8),
+                              Text("Halaman $currentPage dari $totalPages"),
+                              const SizedBox(width: 8),
+                              DropdownButton<int>(
+                                value: currentPage,
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    changePage(value);
+                                  }
+                                },
+                                items: List.generate(
+                                  totalPages,
+                                  (index) => DropdownMenuItem(
+                                    value: index + 1,
+                                    child: Text("Ke ${index + 1}"),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.arrow_forward),
+                                onPressed: currentPage < totalPages
+                                    ? () => changePage(currentPage + 1)
+                                    : null,
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 20),
                       ],

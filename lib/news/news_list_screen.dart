@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'detail/news_detail.dart';
 import '../components/appbar.dart';
 import './news_service.dart';
-import 'news_header.dart'; // Import header berita
+import 'news_header.dart';
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -36,9 +36,12 @@ class _NewsListScreenState extends State<NewsListScreen> {
       final fetchedList = await NewsService.fetchNews(page);
       cachedNews[page] = fetchedList;
 
+      // Simulasikan total halaman dari response jika kamu punya totalCount
+      // Gantilah nilai `totalCount` di bawah sesuai dari server jika tersedia
+      final totalCount = 50; // <-- Simulasi jumlah total berita
       setState(() {
         newsList = fetchedList;
-        totalPages = (fetchedList.length / itemsPerPage).ceil();
+        totalPages = (totalCount / itemsPerPage).ceil();
         isLoading = false;
       });
     } catch (e) {
@@ -63,75 +66,90 @@ class _NewsListScreenState extends State<NewsListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                const NewsHeader(), // Tambahkan header berita
+                const NewsHeader(),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: (newsList.length / 2).ceil() + 1,
+                    itemCount: (newsList.length / 2).ceil(),
                     itemBuilder: (context, index) {
-                      if (index < (newsList.length / 2).ceil()) {
-                        final firstIndex = index * 2;
-                        final secondIndex = firstIndex + 1;
+                      final firstIndex = index * 2;
+                      final secondIndex = firstIndex + 1;
 
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: NewsCard(
-                                  news: newsList[firstIndex],
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => NewsDetailScreen(
-                                          newsId: newsList[firstIndex]['news_id'].toString(),
-                                        ),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: NewsCard(
+                                news: newsList[firstIndex],
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => NewsDetailScreen(
+                                        newsId: newsList[firstIndex]['news_id'].toString(),
                                       ),
-                                    );
-                                  },
-                                ),
+                                    ),
+                                  );
+                                },
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: secondIndex < newsList.length
-                                    ? NewsCard(
-                                        news: newsList[secondIndex],
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => NewsDetailScreen(
-                                                newsId: newsList[secondIndex]['news_id'].toString(),
-                                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: secondIndex < newsList.length
+                                  ? NewsCard(
+                                      news: newsList[secondIndex],
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => NewsDetailScreen(
+                                              newsId: newsList[secondIndex]['news_id'].toString(),
                                             ),
-                                          );
-                                        },
-                                      )
-                                    : Container(),
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                onPressed: currentPage > 1 ? () => changePage(currentPage - 1) : null,
-                              ),
-                              Text("Page $currentPage of $totalPages"),
-                              IconButton(
-                                icon: const Icon(Icons.arrow_forward),
-                                onPressed: currentPage < totalPages ? () => changePage(currentPage + 1) : null,
-                              ),
-                            ],
-                          ),
-                        );
-                      }
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Container(),
+                            ),
+                          ],
+                        ),
+                      );
                     },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: currentPage > 1 ? () => changePage(currentPage - 1) : null,
+                      ),
+                      const SizedBox(width: 8),
+                      Text("Halaman $currentPage dari $totalPages"),
+                      const SizedBox(width: 8),
+                      DropdownButton<int>(
+                        value: currentPage,
+                        onChanged: (value) {
+                          if (value != null) {
+                            changePage(value);
+                          }
+                        },
+                        items: List.generate(
+                          totalPages,
+                          (index) => DropdownMenuItem(
+                            value: index + 1,
+                            child: Text("Ke ${index + 1}"),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: currentPage < totalPages ? () => changePage(currentPage + 1) : null,
+                      ),
+                    ],
                   ),
                 ),
               ],

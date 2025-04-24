@@ -18,70 +18,53 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
   int currentPage = 1;
   final int itemsPerPage = 10;
 
+  void changePage(int page) {
+    setState(() {
+      currentPage = page;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final dataProvider = Provider.of<DataProvider>(context);
     final allInfographics = dataProvider.allInfographics;
     final isLoading = dataProvider.isLoading;
 
+    final totalPages = (allInfographics.length / itemsPerPage).ceil();
+
     int startIndex = (currentPage - 1) * itemsPerPage;
-    int endIndex = (startIndex + itemsPerPage);
-    final pagedInfographics = allInfographics.sublist(
-      startIndex,
-      endIndex > allInfographics.length ? allInfographics.length : endIndex,
-    );
+    int endIndex = (startIndex + itemsPerPage).clamp(0, allInfographics.length);
+    final pagedInfographics = allInfographics.sublist(startIndex, endIndex);
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: buildAppBar(),
-      body: Column(
-        children: [
-          Container(
-            color: Color(0xFFFFF6F6),
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Row(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
               children: [
-                Container(width: 5, height: 40, color: Colors.blue),
-                SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Infografis", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text("📍 BPS Kota Salatiga", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-                  ],
+                Container(
+                  color: const Color(0xFFFFF6F6),
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  child: Row(
+                    children: [
+                      Container(width: 5, height: 40, color: Colors.blue),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text("Infografis", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text("📍 BPS Kota Salatiga", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: pagedInfographics.length + 1,
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemCount: pagedInfographics.length,
                     itemBuilder: (context, index) {
-                      if (index == pagedInfographics.length) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                onPressed: currentPage > 1
-                                    ? () => setState(() => currentPage--)
-                                    : null,
-                                child: Text("Previous"),
-                              ),
-                              Text("Page $currentPage"),
-                              TextButton(
-                                onPressed: currentPage * itemsPerPage < allInfographics.length
-                                    ? () => setState(() => currentPage++)
-                                    : null,
-                                child: Text("Next"),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
                       final infographic = pagedInfographics[index];
                       return InfographicCard(
                         img: infographic['img'],
@@ -90,9 +73,44 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
                       );
                     },
                   ),
-          ),
-        ],
-      ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: currentPage > 1 ? () => changePage(currentPage - 1) : null,
+                      ),
+                      const SizedBox(width: 8),
+                      Text("Halaman $currentPage dari $totalPages"),
+                      const SizedBox(width: 8),
+                      DropdownButton<int>(
+                        value: currentPage,
+                        onChanged: (value) {
+                          if (value != null) {
+                            changePage(value);
+                          }
+                        },
+                        items: List.generate(
+                          totalPages,
+                          (index) => DropdownMenuItem(
+                            value: index + 1,
+                            child: Text("Ke ${index + 1}"),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: currentPage < totalPages ? () => changePage(currentPage + 1) : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }
@@ -121,15 +139,13 @@ class InfographicCard extends StatelessWidget {
       await GallerySaver.saveImage(file.path).then((bool? success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              success == true ? 'Gambar berhasil disimpan!' : 'Gagal menyimpan gambar.',
-            ),
+            content: Text(success == true ? 'Gambar berhasil disimpan!' : 'Gagal menyimpan gambar.'),
           ),
         );
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Izin penyimpanan ditolak.')),
+        const SnackBar(content: Text('Izin penyimpanan ditolak.')),
       );
     }
   }
@@ -156,6 +172,8 @@ class InfographicCard extends StatelessWidget {
             width: double.infinity,
             height: 200,
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                const Center(child: Icon(Icons.broken_image, size: 80, color: Colors.grey)),
           ),
         ),
         Padding(
@@ -165,29 +183,29 @@ class InfographicCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 description,
                 style: TextStyle(color: Colors.grey[700], fontSize: 13),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
                 child: IconButton(
-                  icon: Icon(Icons.download, size: 20),
+                  icon: const Icon(Icons.download, size: 20),
                   onPressed: () => downloadImage(context, img),
                 ),
               ),
             ],
           ),
         ),
-        Divider(thickness: 1, height: 24),
+        const Divider(thickness: 1, height: 24),
       ],
     );
   }
