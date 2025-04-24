@@ -1,5 +1,5 @@
-// appbar.dart
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 PreferredSizeWidget buildAppBar() {
   return AppBar(
@@ -21,8 +21,15 @@ PreferredSizeWidget buildAppBar() {
     ),
     actions: [
       IconButton(
-        icon: Icon(Icons.notifications, color: Colors.white),
-        onPressed: () {},
+        icon: Icon(Icons.language, color: Colors.white), // Ganti ikon
+        onPressed: () async {
+          const url = 'https://salatigakota.bps.go.id/id';
+          if (await canLaunch(url)) {
+            await launch(url);
+          } else {
+            throw 'Could not launch $url';
+          }
+        },
       ),
     ],
   );
