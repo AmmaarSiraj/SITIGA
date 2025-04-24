@@ -30,7 +30,8 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
   }
 
   Future<void> fetchAndCachePublications(String category) async {
-    final allData = Provider.of<DataProvider>(context, listen: false).allPublications;
+    final allData =
+        Provider.of<DataProvider>(context, listen: false).allPublications;
 
     final filtered = category == "Semua"
         ? allData
@@ -97,9 +98,10 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                   onSearchChanged: (value) {
                     setState(() {
                       searchQuery = value;
-                      filteredPublications = applySearch(
-                          cachedPublications[selectedFilter] ?? []);
-                      totalPages = (filteredPublications.length / itemsPerPage).ceil();
+                      filteredPublications =
+                          applySearch(cachedPublications[selectedFilter] ?? []);
+                      totalPages =
+                          (filteredPublications.length / itemsPerPage).ceil();
                       currentPage = 1;
                     });
                   },

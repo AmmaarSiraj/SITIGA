@@ -1,10 +1,12 @@
+import 'package:cobabps/HomeScreen/part_publikasi.dart';
 import 'package:flutter/material.dart';
 import '../components/appbar.dart';
 import '../HomeScreen/carousel_section.dart';
 import '../HomeScreen/statistic_section.dart';
 import '../HomeScreen/part_infografis.dart';
 import '../HomeScreen/part_news.dart';
-import '../HomeScreen/part_tabel.dart'; 
+import '../HomeScreen/part_tabel.dart';
+import '../HomeScreen/part_publikasi.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,8 +14,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
-
   final List<String> carouselImages = [
     'assets/images/grup1.png',
     'assets/images/grup4.png',
@@ -36,12 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-            CategoryGrid(), 
+            CategoryGrid(),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  SizedBox(width: 4, height: 24, child: ColoredBox(color: Colors.blue)),
+                  SizedBox(
+                      width: 4,
+                      height: 24,
+                      child: ColoredBox(color: Colors.blue)),
                   SizedBox(width: 8),
                   Text(
                     "Statistik Saat ini",
@@ -53,10 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const StatisticSection(),
             const PartInfografis(),
             const PartNews(),
+            const PartPublikasi(),
           ],
         ),
       ),
-
     );
   }
 }

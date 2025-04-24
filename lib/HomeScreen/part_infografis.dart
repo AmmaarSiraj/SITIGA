@@ -58,7 +58,7 @@ class _PartInfografisState extends State<PartInfografis> {
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.grey[700],
                 ),
-                child: const Text("lainnya"),
+                child: const Text("Lihat Semua"),
               ),
             ],
           ),
