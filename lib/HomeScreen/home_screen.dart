@@ -5,8 +5,13 @@ import '../HomeScreen/carousel_section.dart';
 import '../HomeScreen/statistic_section.dart';
 import '../HomeScreen/part_infografis.dart';
 import '../HomeScreen/part_news.dart';
+<<<<<<< HEAD
 import '../HomeScreen/part_tabel.dart';
 import '../HomeScreen/part_publikasi.dart';
+=======
+import '../HomeScreen/part_tabel.dart'; 
+import '../HomeScreen/part_publikasi.dart'; 
+>>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
 
 class HomeScreen extends StatefulWidget {
   @override

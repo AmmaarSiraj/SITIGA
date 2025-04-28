@@ -80,15 +80,6 @@ class InfografisDetail extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '@Realname',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
                           title,
                           style: TextStyle(
                             fontSize: 20,
@@ -97,23 +88,6 @@ class InfografisDetail extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 10),
-                        Text(
-                          description,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Sumber: BPS • 2 April 2025',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        SizedBox(height: 80), // agar bawah cukup panjang
                       ],
                     ),
                   )

@@ -24,7 +24,7 @@ class _PartNewsState extends State<PartNews> {
   Future<void> loadNews() async {
     final data = await fetchNews();
     setState(() {
-      newsList = data.take(6).toList(); // Ambil 6 berita teratas
+      newsList = data.take(5).toList(); // Ambil 6 berita teratas
       isLoading = false;
     });
   }
