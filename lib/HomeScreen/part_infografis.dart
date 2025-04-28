@@ -60,6 +60,12 @@ class _PartInfografisState extends State<PartInfografis> {
                     ),
                   );
                 },
+<<<<<<< HEAD
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.grey[700],
+                ),
+=======
+>>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                 child: const Text("Lihat Semua"),
               ),
             ],

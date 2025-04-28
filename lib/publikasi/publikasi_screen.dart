@@ -29,6 +29,11 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     fetchPublications(currentPage);
   }
 
+<<<<<<< HEAD
+  Future<void> fetchAndCachePublications(String category) async {
+    final allData =
+        Provider.of<DataProvider>(context, listen: false).allPublications;
+=======
   Future<void> fetchPublications(int page) async {
     if (cachedPublications.containsKey(page)) {
       setState(() {
@@ -38,6 +43,7 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
       });
       return;
     }
+>>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
 
     try {
       final fetchedList = await PublikasiService.fetchPublications(page);
@@ -111,6 +117,17 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                   currentPage: currentPage,
                   totalPages: totalPages,
                   onSearchChanged: (value) {
+<<<<<<< HEAD
+                    setState(() {
+                      searchQuery = value;
+                      filteredPublications =
+                          applySearch(cachedPublications[selectedFilter] ?? []);
+                      totalPages =
+                          (filteredPublications.length / itemsPerPage).ceil();
+                      currentPage = 1;
+                    });
+                  },
+=======
   setState(() {
     searchQuery = value;
     final originalData = cachedPublications[currentPage] ?? [];
@@ -120,6 +137,7 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
   });
 },
 
+>>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                   onFilterChanged: (value) {
                     selectedFilter = value;
                     applyFilters();
