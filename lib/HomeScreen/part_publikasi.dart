@@ -1,13 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-<<<<<<< HEAD
-import '../publikasi/publikasi_screen.dart';
-import '../publikasi/detail/publikasi_detail.dart';
-=======
 import '../main_screen.dart';
 import '../publikasi/detail/publikasi_detail.dart'; // Import detail popup
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
 
 class PartPublikasi extends StatefulWidget {
   const PartPublikasi({super.key});
@@ -59,32 +54,18 @@ class _PartPublikasiState extends State<PartPublikasi> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-<<<<<<< HEAD
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24), // Atas = 0
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 24), // Tambahkan spasi atas
-          // Header
-=======
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Judul + Lihat lainnya
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-<<<<<<< HEAD
-                  Container(width: 4, height: 24, color: Colors.blue),
-                  const SizedBox(width: 8),
-=======
                   Container(width: 4, height: 20, color: Colors.blue),
                   const SizedBox(width: 6),
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                   Text(
                     'Publikasi',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -98,22 +79,6 @@ class _PartPublikasiState extends State<PartPublikasi> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-<<<<<<< HEAD
-                      builder: (_) => PublicationListScreen(),
-                    ),
-                  );
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.grey[700],
-                ),
-                child: const Text("Lihat lainnya"),
-              )
-            ],
-          ),
-          const SizedBox(
-              height:
-                  12), // Menyesuaikan jarak vertikal antara header dan publikasi
-=======
                       builder: (_) => const MainScreen(initialIndex: 3),
                     ),
                   );
@@ -124,7 +89,6 @@ class _PartPublikasiState extends State<PartPublikasi> {
           ),
           const SizedBox(height: 12),
 
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : Column(
@@ -134,46 +98,16 @@ class _PartPublikasiState extends State<PartPublikasi> {
                         showPublicationDetailPopup(context, item);
                       },
                       child: Container(
-<<<<<<< HEAD
-                        margin: const EdgeInsets.only(
-                            bottom:
-                                12), // Menambahkan jarak antar item publikasi
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-=======
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF9F9F9),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey.shade200),
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                         ),
                         child: Row(
                           children: [
                             ClipRRect(
-<<<<<<< HEAD
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                item['cover'] ?? '',
-                                width: 60,
-                                height: 80,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.broken_image, size: 60),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-=======
                               borderRadius: BorderRadius.circular(10),
                               child: Image.network(
                                 item['cover'] ?? '',
@@ -185,7 +119,6 @@ class _PartPublikasiState extends State<PartPublikasi> {
                               ),
                             ),
                             const SizedBox(width: 10),
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,35 +128,16 @@ class _PartPublikasiState extends State<PartPublikasi> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-<<<<<<< HEAD
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-=======
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                                   Text(
                                     item['abstract'] ?? '',
                                     maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-<<<<<<< HEAD
-                                      fontSize: 12,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Tahun ${item['pub_year'] ?? ''}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-=======
                                       fontSize: 11.5,
                                       color: Colors.black87,
                                     ),
@@ -233,7 +147,6 @@ class _PartPublikasiState extends State<PartPublikasi> {
                                     item['pub_year'] ?? '',
                                     style: const TextStyle(
                                       fontSize: 11,
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -250,8 +163,5 @@ class _PartPublikasiState extends State<PartPublikasi> {
       ),
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
+

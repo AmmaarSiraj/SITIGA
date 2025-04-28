@@ -13,7 +13,8 @@ class PublicationListScreen extends StatefulWidget {
 
 class _PublicationListScreenState extends State<PublicationListScreen> {
   final ScrollController _scrollController = ScrollController();
-  Map<int, List<Map<String, dynamic>>> cachedPublications = {}; // Cache berdasarkan halaman
+  Map<int, List<Map<String, dynamic>>> cachedPublications =
+      {}; // Cache berdasarkan halaman
   List<Map<String, dynamic>> filteredPublications = [];
 
   bool isLoading = true;
@@ -29,11 +30,6 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     fetchPublications(currentPage);
   }
 
-<<<<<<< HEAD
-  Future<void> fetchAndCachePublications(String category) async {
-    final allData =
-        Provider.of<DataProvider>(context, listen: false).allPublications;
-=======
   Future<void> fetchPublications(int page) async {
     if (cachedPublications.containsKey(page)) {
       setState(() {
@@ -43,7 +39,6 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
       });
       return;
     }
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
 
     try {
       final fetchedList = await PublikasiService.fetchPublications(page);
@@ -73,24 +68,23 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
   }
 
   void changePage(int page) {
-  setState(() {
-    isLoading = true;
-  });
-
-  fetchPublications(page).then((_) {
-    // Pastikan animateTo hanya dipanggil setelah widget selesai di-render
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
+    setState(() {
+      isLoading = true;
     });
-  });
-}
 
+    fetchPublications(page).then((_) {
+      // Pastikan animateTo hanya dipanggil setelah widget selesai di-render
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    });
+  }
 
   void applyFilters() {
     setState(() {
@@ -117,27 +111,16 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                   currentPage: currentPage,
                   totalPages: totalPages,
                   onSearchChanged: (value) {
-<<<<<<< HEAD
                     setState(() {
                       searchQuery = value;
-                      filteredPublications =
-                          applySearch(cachedPublications[selectedFilter] ?? []);
+                      final originalData =
+                          cachedPublications[currentPage] ?? [];
+                      filteredPublications = applySearch(originalData);
                       totalPages =
                           (filteredPublications.length / itemsPerPage).ceil();
                       currentPage = 1;
                     });
                   },
-=======
-  setState(() {
-    searchQuery = value;
-    final originalData = cachedPublications[currentPage] ?? [];
-    filteredPublications = applySearch(originalData);
-    totalPages = (filteredPublications.length / itemsPerPage).ceil();
-    currentPage = 1;
-  });
-},
-
->>>>>>> f1680d6ce69745b7f39b4191619cb49e214dd591
                   onFilterChanged: (value) {
                     selectedFilter = value;
                     applyFilters();
