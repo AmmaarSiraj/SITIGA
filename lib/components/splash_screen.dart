@@ -45,16 +45,17 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _loadInitialData() async {
-    try {
-      final dataProvider = Provider.of<DataProvider>(context, listen: false);
-      await dataProvider.loadData();
-    } catch (e) {
-      print("Error loading initial data: $e");
-    } finally {
-      _isDataLoaded = true;
-      _tryNavigate();
-    }
+  try {
+    final dataProvider = Provider.of<DataProvider>(context, listen: false);
+    await dataProvider.preloadMinimalData();
+  } catch (e) {
+    print("Error loading minimal data: $e");
+  } finally {
+    _isDataLoaded = true;
+    _tryNavigate();
   }
+}
+
 
   void _tryNavigate() {
     if (_isDataLoaded && _isVideoFinished && mounted) {

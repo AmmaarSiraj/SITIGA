@@ -3,8 +3,8 @@ import '../../components/appbar.dart';
 import '../publikasi/publikasi_grid.dart';
 import 'publikasi_header.dart';
 import 'publikasi_pencarian_filter.dart';
-import 'package:provider/provider.dart';
-import '../providers/data_provider.dart';
+import '../publikasi/next_page.dart';
+import '../publikasi/publikasi_service.dart';
 
 class PublicationListScreen extends StatefulWidget {
   @override
@@ -13,7 +13,7 @@ class PublicationListScreen extends StatefulWidget {
 
 class _PublicationListScreenState extends State<PublicationListScreen> {
   final ScrollController _scrollController = ScrollController();
-  Map<String, List<Map<String, dynamic>>> cachedPublications = {};
+  Map<int, List<Map<String, dynamic>>> cachedPublications = {}; // Cache berdasarkan halaman
   List<Map<String, dynamic>> filteredPublications = [];
 
   bool isLoading = true;
@@ -26,23 +26,35 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
   @override
   void initState() {
     super.initState();
-    fetchAndCachePublications("Semua");
+    fetchPublications(currentPage);
   }
 
-  Future<void> fetchAndCachePublications(String category) async {
-    final allData = Provider.of<DataProvider>(context, listen: false).allPublications;
+  Future<void> fetchPublications(int page) async {
+    if (cachedPublications.containsKey(page)) {
+      setState(() {
+        filteredPublications = applySearch(cachedPublications[page]!);
+        currentPage = page;
+        isLoading = false;
+      });
+      return;
+    }
 
-    final filtered = category == "Semua"
-        ? allData
-        : allData.where((item) => item['category'] == category).toList();
+    try {
+      final fetchedList = await PublikasiService.fetchPublications(page);
+      cachedPublications[page] = fetchedList;
 
-    cachedPublications[category] = filtered;
-
-    setState(() {
-      filteredPublications = applySearch(filtered);
-      totalPages = (filteredPublications.length / itemsPerPage).ceil();
-      isLoading = false;
-    });
+      setState(() {
+        filteredPublications = applySearch(fetchedList);
+        totalPages = 10; // Atau ambil dari server
+        currentPage = page;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("Error fetching publications: $e");
+    }
   }
 
   List<Map<String, dynamic>> applySearch(List<Map<String, dynamic>> data) {
@@ -54,35 +66,37 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     }).toList();
   }
 
+  void changePage(int page) {
+  setState(() {
+    isLoading = true;
+  });
+
+  fetchPublications(page).then((_) {
+    // Pastikan animateTo hanya dipanggil setelah widget selesai di-render
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  });
+}
+
+
   void applyFilters() {
     setState(() {
       isLoading = true;
     });
-    fetchAndCachePublications(selectedFilter);
-    currentPage = 1;
-  }
-
-  void changePage(int page) {
-    setState(() {
-      currentPage = page;
-    });
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
+    cachedPublications.remove(selectedFilter); // Clear cache biar fetch ulang
+    fetchPublications(1);
   }
 
   @override
   Widget build(BuildContext context) {
-    int startIndex = (currentPage - 1) * itemsPerPage;
-    int endIndex = startIndex + itemsPerPage;
-    List<Map<String, dynamic>> pagedPublications = filteredPublications.sublist(
-      startIndex,
-      endIndex > filteredPublications.length
-          ? filteredPublications.length
-          : endIndex,
-    );
+    List<Map<String, dynamic>> pagedPublications = filteredPublications;
 
     return Scaffold(
       appBar: buildAppBar(),
@@ -94,18 +108,24 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                 PublikasiPencarianFilter(
                   searchQuery: searchQuery,
                   selectedFilter: selectedFilter,
+                  currentPage: currentPage,
+                  totalPages: totalPages,
                   onSearchChanged: (value) {
-                    setState(() {
-                      searchQuery = value;
-                      filteredPublications = applySearch(
-                          cachedPublications[selectedFilter] ?? []);
-                      totalPages = (filteredPublications.length / itemsPerPage).ceil();
-                      currentPage = 1;
-                    });
-                  },
+  setState(() {
+    searchQuery = value;
+    final originalData = cachedPublications[currentPage] ?? [];
+    filteredPublications = applySearch(originalData);
+    totalPages = (filteredPublications.length / itemsPerPage).ceil();
+    currentPage = 1;
+  });
+},
+
                   onFilterChanged: (value) {
                     selectedFilter = value;
                     applyFilters();
+                  },
+                  onPageChanged: (page) {
+                    changePage(page);
                   },
                 ),
                 Expanded(
@@ -117,44 +137,13 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                           publications: pagedPublications,
                           scrollController: _scrollController,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                onPressed: currentPage > 1
-                                    ? () => changePage(currentPage - 1)
-                                    : null,
-                              ),
-                              const SizedBox(width: 8),
-                              Text("Halaman $currentPage dari $totalPages"),
-                              const SizedBox(width: 8),
-                              DropdownButton<int>(
-                                value: currentPage,
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    changePage(value);
-                                  }
-                                },
-                                items: List.generate(
-                                  totalPages,
-                                  (index) => DropdownMenuItem(
-                                    value: index + 1,
-                                    child: Text("Ke ${index + 1}"),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                icon: const Icon(Icons.arrow_forward),
-                                onPressed: currentPage < totalPages
-                                    ? () => changePage(currentPage + 1)
-                                    : null,
-                              ),
-                            ],
-                          ),
+                        NextPage(
+                          currentPage: currentPage,
+                          totalPages: totalPages,
+                          onPageChanged: (page) {
+                            changePage(page);
+                          },
+                          scrollController: _scrollController,
                         ),
                         const SizedBox(height: 20),
                       ],

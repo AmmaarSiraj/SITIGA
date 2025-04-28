@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:google_fonts/google_fonts.dart';
 import 'tabellist.dart';
 import '../components/loading_progres.dart';
 import '../components/modern_filter_screen.dart';
 import '../../components/appbar.dart';
+import '../tabel/tabel_service.dart'; // <- Import service baru
 
 class MyApp extends StatelessWidget {
   @override
@@ -37,8 +36,11 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
   int completedRequests = 0;
   final int totalRequests = 137;
 
+  String searchQuery = "";
+  String selectedCategory = "Semua";
+  int minTables = 1;
+
   Map<String, String> categoryMapping = {
-    // mapping tetap sama
     "Kependudukan dan Migrasi": "Statistik Demografi dan Sosial",
     "Tenaga Kerja": "Statistik Demografi dan Sosial",
     "Pendidikan": "Statistik Demografi dan Sosial",
@@ -81,11 +83,6 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
     "Keadaan geografi": "Statistik Lingkungan Hidup dan Multi-domain",
   };
 
-  @override
-  String searchQuery = "";
-  String selectedCategory = "Semua";
-  int minTables = 1; // Atur nilai default sesuai kebutuhan
-  // Mapping kategori filter ke kategori utama
   Map<String, List<String>> categoryFilterMapping = {
     "Populasi & Demografi": ["Statistik Demografi dan Sosial"],
     "Ekonomi & Keuangan": ["Statistik Ekonomi"],
@@ -99,64 +96,28 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
     "Industri & Perdagangan": ["Statistik Ekonomi"],
   };
 
+  @override
   void initState() {
     super.initState();
-    fetchPublications();
-  }
-
-  Future<void> fetchPage(String url) async {
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['data'] is List && data['data'].length > 1) {
-          final List<dynamic> rawList = data['data'][1];
+    TabelService(
+      totalRequests: totalRequests,
+      onDataFetched: (fetchedData) {
+        if (mounted) {
           setState(() {
-            for (var table in rawList) {
-              String subj = table['subj']?.toString() ?? "Uncategorized";
-              String? mainCategory = categoryMapping[subj] ?? "Uncategorized";
-
-              if (!groupedCategories.containsKey(mainCategory)) {
-                groupedCategories[mainCategory] = {};
-              }
-
-              groupedCategories[mainCategory]!
-                  .putIfAbsent(subj, () => [])
-                  .add(table);
-            }
-            completedRequests++;
+            groupedCategories = fetchedData;
+            isDataLoading = false;
           });
         }
-      } else {
-        throw Exception("Failed to load page: $url");
-      }
-    } catch (e) {
-      print("Error fetching data from $url: $e");
-      setState(() {
-        completedRequests++;
-      });
-    }
-  }
-
-  Future<void> fetchPublications() async {
-    final baseUrl =
-        "https://webapi.bps.go.id/v1/api/list/model/statictable/lang/ind/domain/3373/page/";
-    final key = "/key/91e4d5e9c5a13e1b6214a14f037956de/";
-
-    for (int i = 0; i < totalRequests; i += 10) {
-      // Memproses 10 request sekaligus
-      List<Future<void>> batchRequests = [];
-      for (int j = i; j < i + 10 && j <= totalRequests; j++) {
-        batchRequests.add(fetchPage("$baseUrl$j$key"));
-      }
-      await Future.wait(batchRequests);
-    }
-
-    if (mounted) {
-      setState(() {
-        isDataLoading = false;
-      });
-    }
+      },
+      onProgress: (progress) {
+        if (mounted) {
+          setState(() {
+            completedRequests = progress;
+          });
+        }
+      },
+      categoryMapping: categoryMapping,
+    ).fetchPublications();
   }
 
   @override
@@ -165,7 +126,6 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
       appBar: buildAppBar(),
       body: Column(
         children: [
-          // --- GANTI FILTER DENGAN WIDGET MODERN ---
           ModernFilterScreen(
             onFilterChanged: (String query, String category) {
               setState(() {
@@ -174,10 +134,6 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
               });
             },
           ),
-
-          // --- LIST KATEGORI ---
-
-          // Masih menampilkan kategori utama sebelum subkategori dengan ExpansionTile
           Expanded(
             child: isDataLoading
                 ? Center(
@@ -186,19 +142,17 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
                       total: totalRequests,
                       message: "Memuat data statistik...",
                     ),
-                  ) // Menggunakan LoadingProgress sebagai indikator loading
+                  )
                 : ListView(
                     padding: EdgeInsets.all(12),
                     children: groupedCategories.keys.where((mainCategory) {
-                      if (selectedCategory == "Semua") {
-                        return true; // Tampilkan kategori utama & subkategori
-                      }
+                      if (selectedCategory == "Semua") return true;
                       return categoryFilterMapping[selectedCategory]
                               ?.contains(mainCategory) ??
                           false;
                     }).expand((mainCategory) {
-                      if (selectedCategory == "Semua" && searchQuery.isEmpty) {
-                        // Jika kategori "Semua" dipilih & tidak ada pencarian, tampilkan kategori utama & subkategori
+                      if (selectedCategory == "Semua" &&
+                          searchQuery.isEmpty) {
                         return [
                           Card(
                             shape: RoundedRectangleBorder(
@@ -211,7 +165,8 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
                               title: Text(
                                 mainCategory,
                                 style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
                               ),
                               children: groupedCategories[mainCategory]!
                                   .keys
@@ -243,7 +198,6 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
                           ),
                         ];
                       } else {
-                        // Jika kategori selain "Semua" dipilih atau pencarian dilakukan, tampilkan hanya subkategori
                         return groupedCategories[mainCategory]!
                             .keys
                             .where((subCategory) =>

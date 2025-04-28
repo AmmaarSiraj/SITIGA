@@ -5,6 +5,7 @@ import '../HomeScreen/statistic_section.dart';
 import '../HomeScreen/part_infografis.dart';
 import '../HomeScreen/part_news.dart';
 import '../HomeScreen/part_tabel.dart'; 
+import '../HomeScreen/part_publikasi.dart'; 
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -53,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const StatisticSection(),
             const PartInfografis(),
             const PartNews(),
+            const PartPublikasi(),
           ],
         ),
       ),

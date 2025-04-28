@@ -15,7 +15,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return SizedBox(
-      height: 90,
+      height: 65,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -25,14 +25,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
             child: Container(
               height: 70,
               decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, -2),
-                  ),
-                ],
+                color: Color.fromARGB(20, 218, 217, 217),
               ),
             ),
           ),
@@ -40,7 +33,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
           // Semua tombol dengan posisi manual
           _buildNavItem(Icons.table_view_sharp, "Tabel", 2, screenWidth * 0.1),
           _buildNavItem(Icons.bar_chart, "Infografis", 1, screenWidth * 0.28),
-          _buildNavItem(Icons.home, "Beranda", 0, screenWidth * 0.5, isCenter: true),
+          _buildNavItem(Icons.home, "Beranda", 0, screenWidth * 0.5,
+              isCenter: true),
           _buildNavItem(Icons.article, "Publikasi", 3, screenWidth * 0.72),
           _buildNavItem(Icons.newspaper, "Berita", 4, screenWidth * 0.9),
         ],
@@ -63,36 +57,29 @@ class CustomBottomNavigationBar extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isActive
+                      ? Color.fromARGB(255, 101, 149, 153)
+                      : const Color.fromARGB(0, 255, 255, 255),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isActive ? Colors.blue : Colors.grey.shade300,
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    if (isActive)
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.4),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                  ],
                 ),
                 child: Icon(
                   icon,
-                  size: 32,
-                  color: isActive ? Colors.blue : Colors.grey,
+                  size: 24,
+                  color: isActive ? Colors.white : Color.fromARGB(255, 45, 67, 69),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
-                  color: isActive ? Colors.blue : Colors.grey,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                  color: isActive
+                      ? Color.fromARGB(255, 45, 67, 69)
+                      : const Color.fromARGB(255, 40, 40, 40),
                 ),
               ),
             ],

@@ -15,6 +15,7 @@ class InfographicListScreen extends StatefulWidget {
 }
 
 class _InfographicListScreenState extends State<InfographicListScreen> {
+  
   int currentPage = 1;
   final int itemsPerPage = 10;
 
@@ -69,7 +70,7 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
                       return InfographicCard(
                         img: infographic['img'],
                         title: infographic['title']?.toString() ?? "No Title",
-                        description: infographic['abstract']?.toString() ?? "No Description",
+                        description: infographic['desc']?.toString() ?? "No Description",
                       );
                     },
                   ),
@@ -115,7 +116,7 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
   }
 }
 
-class InfographicCard extends StatelessWidget {
+class InfographicCard extends StatefulWidget {
   final String img;
   final String title;
   final String description;
@@ -126,6 +127,44 @@ class InfographicCard extends StatelessWidget {
     required this.title,
     required this.description,
   }) : super(key: key);
+
+  @override
+  State<InfographicCard> createState() => _InfographicCardState();
+}
+
+class _InfographicCardState extends State<InfographicCard> {
+  bool isExpanded = false;
+  bool showExpandButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkDescriptionLength();
+    });
+  }
+
+  void checkDescriptionLength() {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: cleanDescription(widget.description),
+        style: const TextStyle(fontSize: 13),
+      ),
+      maxLines: 2,
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: MediaQuery.of(context).size.width - 32); // 16 padding kiri + kanan
+
+    if (textPainter.didExceedMaxLines) {
+      setState(() {
+        showExpandButton = true;
+      });
+    }
+  }
+
+  String cleanDescription(String text) {
+  return text.replaceAll(RegExp(r'<\/?p>'), '').trim();
+}
+
 
   Future<void> downloadImage(BuildContext context, String imgUrl) async {
     final status = await Permission.storage.request();
@@ -160,15 +199,15 @@ class InfographicCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (_) => InfografisDetail(
-                  img: img,
-                  title: title,
-                  description: description,
+                  img: widget.img,
+                  title: widget.title,
+                  description: widget.description,
                 ),
               ),
             );
           },
           child: Image.network(
-            img,
+            widget.img,
             width: double.infinity,
             height: 200,
             fit: BoxFit.cover,
@@ -182,24 +221,36 @@ class InfographicCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
+                widget.title,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
               Text(
-                description,
+                cleanDescription(widget.description),
                 style: TextStyle(color: Colors.grey[700], fontSize: 13),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                maxLines: isExpanded ? null : 2,
+                overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
               ),
+              if (showExpandButton)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      isExpanded = !isExpanded;
+                    });
+                  },
+                  child: Text(
+                    isExpanded ? 'Sembunyikan' : 'Lebih Banyak',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
               const SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
                 child: IconButton(
                   icon: const Icon(Icons.download, size: 20),
-                  onPressed: () => downloadImage(context, img),
+                  onPressed: () => downloadImage(context, widget.img),
                 ),
               ),
             ],
@@ -210,3 +261,4 @@ class InfographicCard extends StatelessWidget {
     );
   }
 }
+

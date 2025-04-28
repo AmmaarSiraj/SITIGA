@@ -5,6 +5,9 @@ import 'package:cobabps/publikasi/publikasi_screen.dart';
 import 'package:cobabps/tabel/tabel.dart';
 import 'package:cobabps/infographic/infographic_list_screen.dart';
 import 'components/bottom_navigation_bar.dart';
+import 'package:provider/provider.dart'; // <== Tambah ini
+import '../providers/data_provider.dart'; // <== Pastikan import ini
+
 
 class MainScreen extends StatefulWidget {
   final int initialIndex;
@@ -30,7 +33,14 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    Future.microtask(() {
+      final dataProvider = Provider.of<DataProvider>(context, listen: false);
+      dataProvider.loadAllData();
+    });
   }
+  
+
+  
 
   void _onTabTapped(int index) {
     setState(() {

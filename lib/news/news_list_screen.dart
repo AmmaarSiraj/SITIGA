@@ -3,6 +3,7 @@ import 'detail/news_detail.dart';
 import '../components/appbar.dart';
 import './news_service.dart';
 import 'news_header.dart';
+import '../news/next_page.dart';
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -37,7 +38,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       cachedNews[page] = fetchedList;
 
       // Simulasikan total halaman dari response jika kamu punya totalCount
-      // Gantilah nilai `totalCount` di bawah sesuai dari server jika tersedia
+      // Gantilah nilai totalCount di bawah sesuai dari server jika tersedia
       final totalCount = 50; // <-- Simulasi jumlah total berita
       setState(() {
         newsList = fetchedList;
@@ -61,100 +62,105 @@ class _NewsListScreenState extends State<NewsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                const NewsHeader(),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: (newsList.length / 2).ceil(),
-                    itemBuilder: (context, index) {
-                      final firstIndex = index * 2;
-                      final secondIndex = firstIndex + 1;
+        appBar: buildAppBar(),
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(children: [
+                NewsHeader(
+  currentPage: currentPage,
+  totalPages: totalPages,
+  onPageChanged: (page) {
+    setState(() {
+      currentPage = page;
+      isLoading = true;
+    });
+    fetchNews(page);
+  },
+),
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: NewsCard(
-                                news: newsList[firstIndex],
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => NewsDetailScreen(
-                                        newsId: newsList[firstIndex]['news_id'].toString(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: secondIndex < newsList.length
-                                  ? NewsCard(
-                                      news: newsList[secondIndex],
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics:
+                              const NeverScrollableScrollPhysics(), // Biar tidak scroll sendiri
+                          itemCount: (newsList.length / 2).ceil(),
+                          itemBuilder: (context, index) {
+                            final firstIndex = index * 2;
+                            final secondIndex = firstIndex + 1;
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: NewsCard(
+                                      news: newsList[firstIndex],
                                       onTap: () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => NewsDetailScreen(
-                                              newsId: newsList[secondIndex]['news_id'].toString(),
+                                            builder: (context) =>
+                                                NewsDetailScreen(
+                                              newsId: newsList[firstIndex]
+                                                      ['news_id']
+                                                  .toString(),
                                             ),
                                           ),
                                         );
                                       },
-                                    )
-                                  : Container(),
-                            ),
-                          ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: secondIndex < newsList.length
+                                        ? NewsCard(
+                                            news: newsList[secondIndex],
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      NewsDetailScreen(
+                                                    newsId:
+                                                        newsList[secondIndex]
+                                                                ['news_id']
+                                                            .toString(),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          )
+                                        : Container(),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: currentPage > 1 ? () => changePage(currentPage - 1) : null,
-                      ),
-                      const SizedBox(width: 8),
-                      Text("Halaman $currentPage dari $totalPages"),
-                      const SizedBox(width: 8),
-                      DropdownButton<int>(
-                        value: currentPage,
-                        onChanged: (value) {
-                          if (value != null) {
-                            changePage(value);
-                          }
-                        },
-                        items: List.generate(
-                          totalPages,
-                          (index) => DropdownMenuItem(
-                            value: index + 1,
-                            child: Text("Ke ${index + 1}"),
-                          ),
+                        const SizedBox(
+                            height: 20), // kasih jarak dikit biar nggak nempel
+                        NextPage(
+                          currentPage: currentPage,
+                          totalPages: totalPages,
+                          onPageChanged: (page) {
+                            setState(() {
+                              currentPage = page;
+                              isLoading = true;
+                            });
+                            fetchNews(page);
+                          },
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward),
-                        onPressed: currentPage < totalPages ? () => changePage(currentPage + 1) : null,
-                      ),
-                    ],
+                        const SizedBox(
+                            height: 20), // opsional, buat jarak bawah
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-    );
+                )
+              ]));
   }
 }
 
@@ -177,7 +183,8 @@ class NewsCard extends StatelessWidget {
           children: [
             news['picture'] != null
                 ? ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(12)),
                     child: Image.network(
                       news['picture'],
                       height: 120,
@@ -189,7 +196,8 @@ class NewsCard extends StatelessWidget {
                     height: 120,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
                     ),
                   ),
             Padding(
@@ -199,7 +207,8 @@ class NewsCard extends StatelessWidget {
                 children: [
                   Text(
                     news['title']?.toString() ?? "No Title",
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

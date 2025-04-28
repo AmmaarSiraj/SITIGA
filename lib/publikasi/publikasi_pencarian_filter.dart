@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 class PublikasiPencarianFilter extends StatelessWidget {
   final String searchQuery;
   final String selectedFilter;
+  final int currentPage;
+  final int totalPages;
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<String> onFilterChanged;
+  final ValueChanged<int> onPageChanged;
 
   const PublikasiPencarianFilter({
     Key? key,
@@ -12,6 +15,9 @@ class PublikasiPencarianFilter extends StatelessWidget {
     required this.selectedFilter,
     required this.onSearchChanged,
     required this.onFilterChanged,
+    required this.currentPage,
+    required this.totalPages,
+    required this.onPageChanged,
   }) : super(key: key);
 
   @override
@@ -39,18 +45,58 @@ class PublikasiPencarianFilter extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          ElevatedButton.icon(
+          // Tombol filter hanya icon
+          ElevatedButton(
             onPressed: () {
               _showFilterDialog(context);
             },
-            icon: const Icon(Icons.filter_list),
-            label: const Text("Filter"),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blueAccent,
               foregroundColor: Colors.white,
-              minimumSize: const Size(100, 50),
+              minimumSize: const Size(50, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: EdgeInsets.zero,
             ),
+            child: const Icon(Icons.filter_list),
           ),
+          const SizedBox(width: 10),
+          // Dropdown untuk lompat halaman
+          
+            SizedBox(
+  width: 60, // <<< Lebar kecil, kayak angka 2 digit
+  height: 50, // <<< Tinggi sama kayak tombol search
+  child: DropdownButtonFormField<int>(
+    value: currentPage,
+    decoration: InputDecoration(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      filled: true,
+      fillColor: Colors.white,
+    ),
+    onChanged: totalPages == 1 ? null : (value) {
+      if (value != null) {
+        onPageChanged(value);
+      }
+    },
+    items: List.generate(
+      totalPages,
+      (index) => DropdownMenuItem(
+        value: index + 1,
+        child: Text(
+          "${index + 1}",
+          style: const TextStyle(fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ),
+    menuMaxHeight: 200, // <<< Ini supaya dropdown tidak terlalu panjang, scroll kalau banyak item
+  ),
+),
+
         ],
       ),
     );
