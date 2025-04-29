@@ -13,7 +13,8 @@ class PublicationListScreen extends StatefulWidget {
 
 class _PublicationListScreenState extends State<PublicationListScreen> {
   final ScrollController _scrollController = ScrollController();
-  Map<int, List<Map<String, dynamic>>> cachedPublications = {}; // Cache berdasarkan halaman
+  Map<int, List<Map<String, dynamic>>> cachedPublications =
+      {}; // Cache berdasarkan halaman
   List<Map<String, dynamic>> filteredPublications = [];
 
   bool isLoading = true;
@@ -67,24 +68,23 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
   }
 
   void changePage(int page) {
-  setState(() {
-    isLoading = true;
-  });
-
-  fetchPublications(page).then((_) {
-    // Pastikan animateTo hanya dipanggil setelah widget selesai di-render
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
+    setState(() {
+      isLoading = true;
     });
-  });
-}
 
+    fetchPublications(page).then((_) {
+      // Pastikan animateTo hanya dipanggil setelah widget selesai di-render
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    });
+  }
 
   void applyFilters() {
     setState(() {
@@ -111,15 +111,16 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                   currentPage: currentPage,
                   totalPages: totalPages,
                   onSearchChanged: (value) {
-  setState(() {
-    searchQuery = value;
-    final originalData = cachedPublications[currentPage] ?? [];
-    filteredPublications = applySearch(originalData);
-    totalPages = (filteredPublications.length / itemsPerPage).ceil();
-    currentPage = 1;
-  });
-},
-
+                    setState(() {
+                      searchQuery = value;
+                      final originalData =
+                          cachedPublications[currentPage] ?? [];
+                      filteredPublications = applySearch(originalData);
+                      totalPages =
+                          (filteredPublications.length / itemsPerPage).ceil();
+                      currentPage = 1;
+                    });
+                  },
                   onFilterChanged: (value) {
                     selectedFilter = value;
                     applyFilters();

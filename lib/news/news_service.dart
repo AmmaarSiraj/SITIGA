@@ -8,14 +8,22 @@ class NewsService {
   static const String _apiKey = "91e4d5e9c5a13e1b6214a14f037956de";
 
   static Future<List<Map<String, dynamic>>> fetchNews(int page) async {
-    final response = await http.get(Uri.parse("$_baseUrl$page/key/$_apiKey"));
+  final response = await http.get(Uri.parse("$_baseUrl$page/key/$_apiKey"));
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data['data'] is List && data['data'].length > 1) {
-        return (data['data'][1] as List).cast<Map<String, dynamic>>();
-      }
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    print('Page: $page');
+    print('Raw Data: ${data['data']}');
+
+    if (data['data'] is List && data['data'].length > 1) {
+      final metadata = data['data'][0];
+      final lastPage = metadata['last_page'];
+      print('Total Pages: $lastPage');
+
+      return (data['data'][1] as List).cast<Map<String, dynamic>>();
     }
-    throw Exception("Failed to load news data");
   }
+  throw Exception("Failed to load news data");
+}
+
 }
