@@ -1,4 +1,3 @@
-import 'package:cobabps/HomeScreen/part_publikasi.dart';
 import 'package:flutter/material.dart';
 import '../components/appbar.dart';
 import '../HomeScreen/carousel_section.dart';
@@ -7,6 +6,7 @@ import '../HomeScreen/part_infografis.dart';
 import '../HomeScreen/part_news.dart';
 import '../HomeScreen/part_tabel.dart';
 import '../HomeScreen/part_publikasi.dart';
+import '../Search/search_page.dart'; // Tambahkan ini
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -59,6 +59,16 @@ class _HomeScreenState extends State<HomeScreen> {
             const PartPublikasi(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SearchPage()),
+          );
+        },
+        backgroundColor: Color.fromARGB(255, 101, 149, 153),
+        child: const Icon(Icons.search),
       ),
     );
   }

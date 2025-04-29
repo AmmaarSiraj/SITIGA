@@ -4,6 +4,7 @@ import '../components/appbar.dart';
 import './news_service.dart';
 import 'news_header.dart';
 import '../news/next_page.dart';
+import '../Search/search_page.dart';
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -160,7 +161,18 @@ class _NewsListScreenState extends State<NewsListScreen> {
                     ),
                   ),
                 )
-              ]));
+              ]),
+          floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SearchPage()),
+          );
+        },
+        backgroundColor: Color.fromARGB(255, 101, 149, 153),
+        child: const Icon(Icons.search),
+      ),
+              );
   }
 }
 

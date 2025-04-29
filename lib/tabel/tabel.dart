@@ -5,6 +5,7 @@ import '../components/loading_progres.dart';
 import '../components/modern_filter_screen.dart';
 import '../../components/appbar.dart';
 import '../tabel/tabel_service.dart'; // <- Import service baru
+import '../Search/search_page.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -240,6 +241,16 @@ class _StatisticTableScreenState extends State<StatisticTableScreen> {
                   ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SearchPage()),
+          );
+        },
+        backgroundColor: Color.fromARGB(255, 101, 149, 153),
+        child: const Icon(Icons.search),
       ),
     );
   }

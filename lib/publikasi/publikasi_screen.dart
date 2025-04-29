@@ -5,6 +5,7 @@ import 'publikasi_header.dart';
 import 'publikasi_pencarian_filter.dart';
 import '../publikasi/next_page.dart';
 import '../publikasi/publikasi_service.dart';
+import '../Search/search_page.dart';
 
 class PublicationListScreen extends StatefulWidget {
   @override
@@ -153,6 +154,16 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                 ),
               ],
             ),
+              floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SearchPage()),
+          );
+        },
+        backgroundColor: Color.fromARGB(255, 101, 149, 153),
+        child: const Icon(Icons.search),
+      ),
     );
   }
 }
