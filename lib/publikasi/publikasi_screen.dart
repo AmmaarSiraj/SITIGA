@@ -3,7 +3,7 @@ import '../../components/appbar.dart';
 import '../publikasi/publikasi_grid.dart';
 import 'publikasi_header.dart';
 import 'publikasi_pencarian_filter.dart';
-import '../publikasi/next_page.dart';
+import '../components/next_page.dart';
 import '../publikasi/publikasi_service.dart';
 
 class PublicationListScreen extends StatefulWidget {
@@ -41,20 +41,22 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
   /// Load satu page saja jika filter = Semua,
   /// atau load semua pages + filter jika filter aktif
   Future<void> _loadPage(int page) async {
-    setState(() => isLoading = true);
+  setState(() => isLoading = true);
 
-    if (selectedFilter == '(Semua)') {
-      // NORMAL: fetch page tunggal
-      await _fetchAndCachePage(page);
-      _applyLocalFilterAndPaginate(page);
-    } else {
-      // FILTER GLOBAL: fetch semua pages
-      await _fetchAllPages();
-      _applyGlobalFilterAndPaginate(1);
-    }
-
-    setState(() => isLoading = false);
+  // Kalau ada searchQuery atau filter != Semua, fetch semua pages dan apply global
+  if (searchQuery.isNotEmpty || selectedFilter != '(Semua)') {
+    await _fetchAllPages();
+    _applyGlobalFilterAndPaginate(page);
   }
+  else {
+    // normal: fetch & filter satu page
+    await _fetchAndCachePage(page);
+    _applyLocalFilterAndPaginate(page);
+  }
+
+  setState(() => isLoading = false);
+}
+
 
   Future<void> _fetchAndCachePage(int page) async {
     if (!cachedPublications.containsKey(page)) {
@@ -167,15 +169,10 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                   currentPage: currentPage,
                   totalPages: totalPages,
                   onSearchChanged: (value) {
-                    setState(() => searchQuery = value);
-                    // re-apply sesuai mode
-                    if (selectedFilter == '(Semua)') {
-                      _applyLocalFilterAndPaginate(currentPage);
-                    } else {
-                      _applyGlobalFilterAndPaginate(currentPage);
-                    }
+  setState(() => searchQuery = value);
+  _loadPage(1);
+},
 
-                  },
                   onFilterChanged: (value) {
                     applyFilters(value);
                   },

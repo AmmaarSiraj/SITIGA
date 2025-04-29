@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import '../publikasi/publikasi_service.dart';  // Import service publikasi
 import '../news/news_service.dart';      // Import service berita
 import '../infographic/infographic_service.dart';
+import '../net/network.dart';
 
 class DataProvider with ChangeNotifier {
-  List<Map<String, dynamic>> allPublications = [];
-  List<Map<String, dynamic>> allNews = [];
+  // List<Map<String, dynamic>> allPublications = [];
+  // List<Map<String, dynamic>> allNews = [];
   List<Map<String, dynamic>> allInfographics = [];
+  List<Map<String, dynamic>> allSubjects = [];
   bool isLoading = false;
 
   Future<void> preloadMinimalData() async {
@@ -14,15 +16,19 @@ class DataProvider with ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
-    final fetchNews = NewsService.fetchNews(1);
+    // final fetchNews = NewsService.fetchNews(1);
+    // final fetchPublications = PublikasiService.fetchPublications(1); // <= Tambahkan ini
     final fetchInfographics = fetchAllInfographics(totalPages: 2);
-    final fetchPublications = PublikasiService.fetchPublications(1); // <= Tambahkan ini
+    final fetchSubjectsFuture = fetchSubjects();
+    
 
-    final results = await Future.wait([fetchNews, fetchInfographics, fetchPublications]);
+    final results = await Future.wait([ fetchInfographics, fetchSubjectsFuture, ]);
 
-    allNews = results[0];
-    allInfographics = results[1];
-    allPublications = results[2];
+    // allNews = results[0];
+    // allPublications = results[2];
+    allInfographics = results[0];
+    allSubjects = results[1];
+    
 
     isLoading = false;
     notifyListeners();
@@ -43,8 +49,8 @@ Future<void> loadAllData() async {
 
     final results = await Future.wait([fetchPublications, fetchNews, fetchInfographics]);
 
-    allPublications = results[0];
-    allNews = results[1];
+    // allPublications = results[0];
+    // allNews = results[1];
     allInfographics = results[2];
 
     notifyListeners();

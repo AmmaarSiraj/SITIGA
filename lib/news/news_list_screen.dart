@@ -3,7 +3,7 @@ import 'detail/news_detail.dart';
 import '../components/appbar.dart';
 import './news_service.dart';
 import 'news_header.dart';
-import '../news/next_page.dart';
+import '../components/next_page.dart';
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -17,6 +17,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
   int currentPage = 1;
   int totalPages = 1;
   final int itemsPerPage = 10;
+
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
       // Simulasikan total halaman dari response jika kamu punya totalCount
       // Gantilah nilai totalCount di bawah sesuai dari server jika tersedia
-      final totalCount = 50; // <-- Simulasi jumlah total berita
+      final totalCount = 190; // <-- Simulasi jumlah total berita
       setState(() {
         newsList = fetchedList;
         totalPages = (totalCount / itemsPerPage).ceil();
@@ -80,6 +82,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
 
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     child: Column(
                       children: [
                         ListView.builder(
@@ -144,16 +147,18 @@ class _NewsListScreenState extends State<NewsListScreen> {
                         const SizedBox(
                             height: 20), // kasih jarak dikit biar nggak nempel
                         NextPage(
-                          currentPage: currentPage,
-                          totalPages: totalPages,
-                          onPageChanged: (page) {
-                            setState(() {
-                              currentPage = page;
-                              isLoading = true;
-                            });
-                            fetchNews(page);
-                          },
-                        ),
+  currentPage: currentPage,
+  totalPages: totalPages,
+  onPageChanged: (page) {
+    setState(() {
+      currentPage = page;
+      isLoading = true;
+    });
+    fetchNews(page);
+  },
+  scrollController: _scrollController, // kirim scrollController
+),
+
                         const SizedBox(
                             height: 20), // opsional, buat jarak bawah
                       ],

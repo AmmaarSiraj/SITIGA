@@ -1,19 +1,15 @@
-import 'package:cobabps/HomeScreen/part_publikasi.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../components/appbar.dart';
 import '../HomeScreen/carousel_section.dart';
 import '../HomeScreen/statistic_section.dart';
 import '../HomeScreen/part_infografis.dart';
 import '../HomeScreen/part_news.dart';
-import '../HomeScreen/part_tabel.dart';
 import '../HomeScreen/part_publikasi.dart';
+import '../HomeScreen/part_tabel.dart';
+import '../providers/data_provider.dart'; // Import provider!
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreen extends StatelessWidget {
   final List<String> carouselImages = [
     'assets/images/grup1.png',
     'assets/images/grup4.png',
@@ -22,6 +18,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dataProvider = Provider.of<DataProvider>(context);
+
+    if (dataProvider.isLoading) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()), // Saat loading, tunjukkan spinner
+      );
+    }
+
     return Scaffold(
       appBar: buildAppBar(),
       body: SingleChildScrollView(
@@ -29,22 +33,17 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CarouselSection(carouselImages: carouselImages),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Tabel Data Statistik",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
+            
             CategoryGrid(),
             const Padding(
               padding: EdgeInsets.all(8.0),
               child: Row(
                 children: [
                   SizedBox(
-                      width: 4,
-                      height: 24,
-                      child: ColoredBox(color: Colors.blue)),
+                    width: 4,
+                    height: 24,
+                    child: ColoredBox(color: Colors.blue),
+                  ),
                   SizedBox(width: 8),
                   Text(
                     "Statistik Saat ini",
@@ -53,10 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            const StatisticSection(),
-            const PartInfografis(),
-            const PartNews(),
-            const PartPublikasi(),
+            StatisticSection(), // Pastikan dia ambil dari Provider juga
+            PartInfografis(),    // Pastikan ambil dari Provider juga
+            PartNews(),          // Pastikan ambil dari Provider juga
+            PartPublikasi(),     // Pastikan ambil dari Provider juga
           ],
         ),
       ),

@@ -1,124 +1,101 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void showPublicationDetailPopup(
-    BuildContext context, Map<String, dynamic> publication) {
-  showDialog(
+void showPublicationDetailPopup(BuildContext context, Map<String, dynamic> publication) {
+  showModalBottomSheet(
     context: context,
-    barrierDismissible: true,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        insetPadding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+    isScrollControlled: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) {
+          return Padding(
+            padding: EdgeInsets.all(16),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tombol close
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
+                Center(
+                  child: Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 4),
-
-                // Judul
-                Text(
-                  publication['title'] ?? "Judul Tidak Tersedia",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                SizedBox(height: 10),
+                Center(
+                  child: Text(
+                    publication['title'] ?? "Judul Tidak Tersedia",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
                 ),
-
-                const SizedBox(height: 16),
-
-                // Cover dan info
+                SizedBox(height: 15),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
-                        width: 100,
-                        height: 140,
-                        child: Image.network(
-                          publication['cover'] ?? "",
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.broken_image, size: 80),
-                        ),
+                    SizedBox(
+                      width: 150,
+                      height: 200,
+                      child: Image.network(
+                        publication['cover'] ?? "",
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 10),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                              "Tanggal Rilis: ${publication['rl_date'] ?? '-'}"),
-                          const SizedBox(height: 4),
-                          Text(
-                              "Nomor Katalog: ${publication['kat_no'] ?? '-'}"),
-                          const SizedBox(height: 4),
-                          Text(
-                              "Nomor Publikasi: ${publication['pub_no'] ?? '-'}"),
-                          const SizedBox(height: 4),
+                          Text("Tanggal Rilis: ${publication['rl_date'] ?? '-'}"),
+                          Text("Nomor Katalog: ${publication['kat_no'] ?? '-'}"),
+                          Text("Nomor Publikasi: ${publication['pub_no'] ?? '-'}"),
                           Text("Ukuran File: ${publication['size'] ?? '-'}"),
-                          const SizedBox(height: 4),
                           Text("ISSN/ISBN: ${publication['issn'] ?? '-'}"),
                         ],
                       ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 16),
-
-                // Abstrak
-                Text(
-                  publication['abstract'] ?? "Tidak ada abstrak yang tersedia.",
-                  textAlign: TextAlign.justify,
-                  style: const TextStyle(fontSize: 13),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Tombol Unduh
-                ElevatedButton(
-                  onPressed: () async {
-                    final pdfUrl = Uri.parse(publication['pdf'] ?? "");
-                    if (await canLaunchUrl(pdfUrl)) {
-                      await launchUrl(pdfUrl,
-                          mode: LaunchMode.externalApplication);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Gagal membuka tautan PDF')),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 40, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                SizedBox(height: 15),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Text(
+                      publication['abstract'] ?? "Tidak ada abstrak yang tersedia.",
+                      textAlign: TextAlign.justify,
                     ),
                   ),
-                  child: const Text("UNDUH"),
+                ),
+                SizedBox(height: 15),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final Uri pdfUrl = Uri.parse(publication['pdf'] ?? "");
+                      if (await canLaunchUrl(pdfUrl)) {
+                        await launchUrl(pdfUrl);
+                      }
+                    },
+                    child: Text("UNDUH"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ),
+          );
+        },
       );
     },
   );

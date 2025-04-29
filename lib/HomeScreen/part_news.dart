@@ -1,4 +1,3 @@
-import 'package:cobabps/news/news_list_screen.dart';
 import 'package:flutter/material.dart';
 import '../news/detail/news_detail.dart';
 import '../main_screen.dart'; // Navigasi ke News tab di MainScreen
@@ -57,15 +56,12 @@ class _PartNewsState extends State<PartNews> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => NewsListScreen(),
+                      builder: (_) => const MainScreen(initialIndex: 4),
                     ),
                   );
                 },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.grey[700],
-                ),
-                child: const Text("Lihat lainnya"),
-              )
+                child: const Text("Lihat Semua"),
+              ),
             ],
           ),
           const SizedBox(height: 12),
