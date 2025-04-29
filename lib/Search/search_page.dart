@@ -117,13 +117,21 @@ class _SearchPageState extends State<SearchPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Row(
-              children: [
-                const Icon(Icons.location_on_outlined, size: 18),
-                const SizedBox(width: 4),
-                const Text('BPS Kota Salatiga'),
-              ],
-            ),
+          Align(
+  alignment: Alignment.topLeft,
+  child: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Icons.location_on, size: 18, color: Colors.grey[700]),
+      SizedBox(width: 4),
+      Text(
+        "BPS Kota Salatiga",
+        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+      ),
+    ],
+  ),
+),
+
             const SizedBox(height: 16),
             Row(
               children: [
