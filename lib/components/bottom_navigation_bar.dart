@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cobabps/news/news_list_screen.dart';
 import 'package:cobabps/MenuNav/profil_bps.dart';
+import 'package:cobabps/MenuNav/profil_developer.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -254,6 +255,12 @@ class _MoreMenuState extends State<MoreMenu> {
                   "Profil Developer",
                   () {
                     Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfilDeveloperPage(),
+                      ),
+                    );
                   },
                   margin: const EdgeInsets.only(left: 32), // Menjorok ke dalam
                 ),

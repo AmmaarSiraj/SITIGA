@@ -16,6 +16,22 @@ class ProfilBPSPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // JUDUL BARU DITAMBAHKAN DI SINI
+              Center(
+                child: Column(
+                  children: const [
+                    Text(
+                      "BPS KOTA SALATIGA",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 24),
+                  ],
+                ),
+              ),
               const Text(
                 "Badan Pusat Statistik (BPS) adalah Lembaga Pemerintah Non-Kementerian yang bertanggung jawab langsung kepada Presiden. "
                 "Awalnya bernama Biro Pusat Statistik berdasarkan UU No. 6 Tahun 1960 dan UU No. 7 Tahun 1960, kemudian berubah menjadi BPS melalui UU No. 16 Tahun 1997 tentang Statistik. "
@@ -23,6 +39,7 @@ class ProfilBPSPage extends StatelessWidget {
                 "melalui sensus, survei, dan pengumpulan data sekunder. Selain itu, BPS mengembangkan sistem statistik nasional, metodologi statistik, pendidikan dan pelatihan statistik, serta menjalin kerja sama internasional. "
                 "Publikasi rutin BPS dilakukan melalui Berita Resmi Statistik (BRS).",
                 style: TextStyle(fontSize: 16, height: 1.6),
+                textAlign: TextAlign.justify,
               ),
               const SizedBox(height: 16),
               const Text(
@@ -32,6 +49,7 @@ class ProfilBPSPage extends StatelessWidget {
                 "Struktur BPS pusat dan daerah terus diperkuat melalui berbagai regulasi, termasuk pembentukan Kantor Statistik Provinsi dan Kabupaten/Kotamadya, hingga akhirnya mengalami transformasi besar pada 19 Mei 1997 melalui pengesahan "
                 "UU No. 16 Tahun 1997 serta pengaturan organisasi daerah dengan Keputusan Presiden No. 86 Tahun 1998 dan PP No. 51 Tahun 1999.",
                 style: TextStyle(fontSize: 16, height: 1.6),
+                textAlign: TextAlign.justify,
               ),
               const SizedBox(height: 16),
               const Divider(),
