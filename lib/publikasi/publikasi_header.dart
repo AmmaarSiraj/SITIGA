@@ -6,7 +6,7 @@ class PublikasiHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFFFF6F6),
+      color: Color.fromARGB(255, 255, 255, 255),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       child: Row(
         children: [

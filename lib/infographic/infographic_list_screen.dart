@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../providers/data_provider.dart';
 
+
 class InfographicListScreen extends StatefulWidget {
   @override
   _InfographicListScreenState createState() => _InfographicListScreenState();

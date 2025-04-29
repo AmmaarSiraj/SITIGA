@@ -15,10 +15,15 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _isDataLoaded = false;
 
   @override
-  void initState() {
-    super.initState();
-    _initApp();
-  }
+void initState() {
+  super.initState();
+  _initApp();
+  // Tambahkan timer 4 detik
+  Future.delayed(Duration(seconds: 4), () {
+    _isVideoFinished = true;
+    _tryNavigate();
+  });
+}
 
   Future<void> _initApp() async {
     // 1. Start loading video
