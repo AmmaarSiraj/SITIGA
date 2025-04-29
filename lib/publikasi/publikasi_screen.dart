@@ -12,68 +12,125 @@ class PublicationListScreen extends StatefulWidget {
 }
 
 class _PublicationListScreenState extends State<PublicationListScreen> {
+  static const int TOTAL_SERVER_PAGES = 24; // Jumlah page di API
   final ScrollController _scrollController = ScrollController();
-  Map<int, List<Map<String, dynamic>>> cachedPublications =
-      {}; // Cache berdasarkan halaman
-  List<Map<String, dynamic>> filteredPublications = [];
+
+  // Cache per-page
+  Map<int, List<Map<String, dynamic>>> cachedPublications = {};
+  // Semua data beserta hasil filter global
+  List<Map<String, dynamic>> allPublications = [];
+  List<Map<String, dynamic>> filteredAllData = [];
+
+  List<Map<String, dynamic>> pagedPublications = [];
+
 
   bool isLoading = true;
   int currentPage = 1;
-  int totalPages = 1;
+  int totalPages = TOTAL_SERVER_PAGES;
   final int itemsPerPage = 12;
+
   String searchQuery = "";
-  String selectedFilter = "Semua";
+  String selectedFilter = '(Semua)';
 
   @override
   void initState() {
     super.initState();
-    fetchPublications(currentPage);
+    _loadPage(1);
   }
 
-  Future<void> fetchPublications(int page) async {
-    if (cachedPublications.containsKey(page)) {
-      setState(() {
-        filteredPublications = applySearch(cachedPublications[page]!);
-        currentPage = page;
-        isLoading = false;
-      });
-      return;
+  /// Load satu page saja jika filter = Semua,
+  /// atau load semua pages + filter jika filter aktif
+  Future<void> _loadPage(int page) async {
+    setState(() => isLoading = true);
+
+    if (selectedFilter == '(Semua)') {
+      // NORMAL: fetch page tunggal
+      await _fetchAndCachePage(page);
+      _applyLocalFilterAndPaginate(page);
+    } else {
+      // FILTER GLOBAL: fetch semua pages
+      await _fetchAllPages();
+      _applyGlobalFilterAndPaginate(1);
     }
 
-    try {
-      final fetchedList = await PublikasiService.fetchPublications(page);
-      cachedPublications[page] = fetchedList;
+    setState(() => isLoading = false);
+  }
 
-      setState(() {
-        filteredPublications = applySearch(fetchedList);
-        totalPages = 10; // Atau ambil dari server
-        currentPage = page;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print("Error fetching publications: $e");
+  Future<void> _fetchAndCachePage(int page) async {
+    if (!cachedPublications.containsKey(page)) {
+      final data = await PublikasiService.fetchPublications(page);
+      cachedPublications[page] = data;
     }
   }
 
-  List<Map<String, dynamic>> applySearch(List<Map<String, dynamic>> data) {
+  Future<void> _fetchAllPages() async {
+    allPublications.clear();
+    for (var p = 1; p <= TOTAL_SERVER_PAGES; p++) {
+      if (!cachedPublications.containsKey(p)) {
+        final data = await PublikasiService.fetchPublications(p);
+        cachedPublications[p] = data;
+      }
+      allPublications.addAll(cachedPublications[p]!);
+    }
+  }
+
+  // Hanya filter & paginate dari satu page saja (tanpa fetch ulang)
+  void _applyLocalFilterAndPaginate(int page) {
+    final pageData = cachedPublications[page]!;
+    filteredAllData = _applySearchAndFilter(pageData);
+
+    totalPages = TOTAL_SERVER_PAGES;
+    currentPage = page;
+    pagedPublications = filteredAllData;
+  }
+
+  // Filter global & buat pagination slice
+  void _applyGlobalFilterAndPaginate(int page) {
+    filteredAllData = _applySearchAndFilter(allPublications);
+
+    totalPages = (filteredAllData.length / itemsPerPage).ceil();
+    currentPage = page;
+
+    final start = (page - 1) * itemsPerPage;
+    pagedPublications = filteredAllData
+        .skip(start)
+        .take(itemsPerPage)
+        .toList();
+  }
+
+  List<Map<String, dynamic>> _applySearchAndFilter(List<Map<String, dynamic>> data) {
     return data.where((pub) {
-      return pub['title']
+      final titleMatch = pub['title']
           .toString()
           .toLowerCase()
           .contains(searchQuery.toLowerCase());
+
+      if (selectedFilter.toLowerCase() == 'semua' || selectedFilter == '(Semua)') {
+        return titleMatch;
+      }
+
+      final rlDate = pub['rl_date']?.toString() ?? '';
+      int? year;
+      try {
+        year = DateTime.parse(rlDate).year;
+      } catch (_) {
+        year = null;
+      }
+
+      bool filterMatch;
+      if (selectedFilter == '<2020') {
+        filterMatch = year != null && year < 2020;
+      } else {
+        final filterYear = int.tryParse(selectedFilter) ?? -1;
+        filterMatch = year != null && year == filterYear;
+      }
+
+      return titleMatch && filterMatch;
     }).toList();
   }
 
   void changePage(int page) {
-    setState(() {
-      isLoading = true;
-    });
-
-    fetchPublications(page).then((_) {
-      // Pastikan animateTo hanya dipanggil setelah widget selesai di-render
+    _loadPage(page).then((_) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
@@ -86,18 +143,17 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     });
   }
 
-  void applyFilters() {
+  void applyFilters(String newFilter) {
+
     setState(() {
-      isLoading = true;
+      selectedFilter = newFilter;
+      searchQuery = "";       // kalau mau reset search juga
     });
-    cachedPublications.remove(selectedFilter); // Clear cache biar fetch ulang
-    fetchPublications(1);
+    _loadPage(1);
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> pagedPublications = filteredPublications;
-
     return Scaffold(
       appBar: buildAppBar(),
       body: isLoading
@@ -111,19 +167,17 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                   currentPage: currentPage,
                   totalPages: totalPages,
                   onSearchChanged: (value) {
-                    setState(() {
-                      searchQuery = value;
-                      final originalData =
-                          cachedPublications[currentPage] ?? [];
-                      filteredPublications = applySearch(originalData);
-                      totalPages =
-                          (filteredPublications.length / itemsPerPage).ceil();
-                      currentPage = 1;
-                    });
+                    setState(() => searchQuery = value);
+                    // re-apply sesuai mode
+                    if (selectedFilter == '(Semua)') {
+                      _applyLocalFilterAndPaginate(currentPage);
+                    } else {
+                      _applyGlobalFilterAndPaginate(currentPage);
+                    }
+
                   },
                   onFilterChanged: (value) {
-                    selectedFilter = value;
-                    applyFilters();
+                    applyFilters(value);
                   },
                   onPageChanged: (page) {
                     changePage(page);
@@ -141,9 +195,7 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
                         NextPage(
                           currentPage: currentPage,
                           totalPages: totalPages,
-                          onPageChanged: (page) {
-                            changePage(page);
-                          },
+                          onPageChanged: changePage,
                           scrollController: _scrollController,
                         ),
                         const SizedBox(height: 20),

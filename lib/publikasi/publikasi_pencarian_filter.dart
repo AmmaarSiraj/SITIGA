@@ -103,34 +103,35 @@ class PublikasiPencarianFilter extends StatelessWidget {
   }
 
   void _showFilterDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final List<String> filters = ['Semua', 'Sosial', 'Ekonomi', 'Pertanian'];
-        return AlertDialog(
-          title: const Text("Pilih Kategori"),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: filters.length,
-              itemBuilder: (context, index) {
-                return RadioListTile<String>(
-                  title: Text(filters[index]),
-                  value: filters[index],
-                  groupValue: selectedFilter,
-                  onChanged: (value) {
-                    if (value != null) {
-                      onFilterChanged(value);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                );
-              },
-            ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      final List<String> filters = ['(Semua)', '2025', '2024', '2023', '2022','2021', '<2020'];
+      return AlertDialog(
+        title: const Text("Pilih Tahun"),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: filters.length,
+            itemBuilder: (context, index) {
+              return RadioListTile<String>(
+                title: Text(filters[index]),
+                value: filters[index],
+                groupValue: selectedFilter,
+                onChanged: (value) {
+                  if (value != null) {
+                    onFilterChanged(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              );
+            },
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
 }
