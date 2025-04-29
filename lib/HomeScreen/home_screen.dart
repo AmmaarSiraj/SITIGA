@@ -8,6 +8,7 @@ import '../HomeScreen/part_news.dart';
 import '../HomeScreen/part_publikasi.dart';
 import '../HomeScreen/part_tabel.dart';
 import '../providers/data_provider.dart'; // Import provider!
+import '../Search/search_page.dart'; // Tambahkan ini
 
 class HomeScreen extends StatelessWidget {
   final List<String> carouselImages = [
@@ -58,6 +59,16 @@ class HomeScreen extends StatelessWidget {
             PartPublikasi(),     // Pastikan ambil dari Provider juga
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SearchPage()),
+          );
+        },
+        backgroundColor: Color.fromARGB(255, 101, 149, 153),
+        child: const Icon(Icons.search),
       ),
     );
   }
