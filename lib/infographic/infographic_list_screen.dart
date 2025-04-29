@@ -8,7 +8,7 @@ import 'detail/infographic_detail.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../providers/data_provider.dart';
-import '../Search/search_page.dart';
+
 
 class InfographicListScreen extends StatefulWidget {
   @override
@@ -113,16 +113,6 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
                 ),
               ],
             ),
-            floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SearchPage()),
-          );
-        },
-        backgroundColor: Color.fromARGB(255, 101, 149, 153),
-        child: const Icon(Icons.search),
-      ),
     );
   }
 }
