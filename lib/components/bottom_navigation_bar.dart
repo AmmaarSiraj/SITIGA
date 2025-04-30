@@ -79,6 +79,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget _buildMoreNavItem(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // Pass the currentIndex to the MoreMenu
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -86,9 +87,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          builder: (context) => const FractionallySizedBox(
-            heightFactor: 0.9,
-            child: MoreMenu(),
+          builder: (context) => MoreMenu(
+            currentIndex: currentIndex,
+            onTap: onTap,
           ),
         );
       },
@@ -124,7 +125,14 @@ class CustomBottomNavigationBar extends StatelessWidget {
 }
 
 class MoreMenu extends StatefulWidget {
-  const MoreMenu({Key? key}) : super(key: key);
+  final int currentIndex;
+  final void Function(int) onTap;
+
+  const MoreMenu({
+    Key? key,
+    required this.currentIndex,
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   State<MoreMenu> createState() => _MoreMenuState();
@@ -191,6 +199,7 @@ class _MoreMenuState extends State<MoreMenu> {
                 const Icon(Icons.newspaper, color: Colors.white, size: 20),
                 "Berita",
                 () {
+                  widget.onTap(3); // Set the index to 3 for "Berita"
                   Navigator.pop(context);
                   Navigator.push(
                     context,
