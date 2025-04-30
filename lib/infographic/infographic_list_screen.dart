@@ -8,7 +8,7 @@ import 'detail/infographic_detail.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../providers/data_provider.dart';
-
+import '../components/next_page.dart';
 
 class InfographicListScreen extends StatefulWidget {
   @override
@@ -16,9 +16,9 @@ class InfographicListScreen extends StatefulWidget {
 }
 
 class _InfographicListScreenState extends State<InfographicListScreen> {
-  
   int currentPage = 1;
   final int itemsPerPage = 10;
+  final ScrollController _scrollController = ScrollController();
 
   void changePage(int page) {
     setState(() {
@@ -49,66 +49,87 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
                   color: const Color(0xFFFFF6F6),
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(width: 5, height: 40, color: Colors.blue),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-                          const Text("Infografis", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          Text("📍 BPS Kota Salatiga", style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                          Container(width: 5, height: 40, color: Colors.blue),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Infografis",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on, size: 18, color: Colors.grey[700]),
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    "BPS Kota Salatiga",
+                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ],
+                      ),
+                      DropdownButton<int>(
+                        value: currentPage,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        onChanged: (int? newPage) {
+                          if (newPage != null) changePage(newPage);
+                          _scrollController.animateTo(
+                            0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        },
+                        items: List.generate(totalPages, (index) {
+                          int pageNumber = index + 1;
+                          return DropdownMenuItem(
+                            value: pageNumber,
+                            child: Text('Halaman $pageNumber'),
+                          );
+                        }),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    itemCount: pagedInfographics.length,
-                    itemBuilder: (context, index) {
-                      final infographic = pagedInfographics[index];
-                      return InfographicCard(
-                        img: infographic['img'],
-                        title: infographic['title']?.toString() ?? "No Title",
-                        description: infographic['desc']?.toString() ?? "No Description",
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: currentPage > 1 ? () => changePage(currentPage - 1) : null,
-                      ),
-                      const SizedBox(width: 8),
-                      Text("Halaman $currentPage dari $totalPages"),
-                      const SizedBox(width: 8),
-                      DropdownButton<int>(
-                        value: currentPage,
-                        onChanged: (value) {
-                          if (value != null) {
-                            changePage(value);
-                          }
-                        },
-                        items: List.generate(
-                          totalPages,
-                          (index) => DropdownMenuItem(
-                            value: index + 1,
-                            child: Text("Ke ${index + 1}"),
-                          ),
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Column(
+                      children: [
+                        ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.only(bottom: 16),
+                          itemCount: pagedInfographics.length,
+                          itemBuilder: (context, index) {
+                            final infographic = pagedInfographics[index];
+                            return InfographicCard(
+                              img: infographic['img'],
+                              title: infographic['title']?.toString() ?? "No Title",
+                              description: infographic['desc']?.toString() ?? "No Description",
+                            );
+                          },
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward),
-                        onPressed: currentPage < totalPages ? () => changePage(currentPage + 1) : null,
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        NextPage(
+                          currentPage: currentPage,
+                          totalPages: totalPages,
+                          onPageChanged: (page) {
+                            changePage(page);
+                          },
+                          scrollController: _scrollController,
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -153,7 +174,7 @@ class _InfographicCardState extends State<InfographicCard> {
       ),
       maxLines: 2,
       textDirection: TextDirection.ltr,
-    )..layout(maxWidth: MediaQuery.of(context).size.width - 32); // 16 padding kiri + kanan
+    )..layout(maxWidth: MediaQuery.of(context).size.width - 32);
 
     if (textPainter.didExceedMaxLines) {
       setState(() {
@@ -163,9 +184,8 @@ class _InfographicCardState extends State<InfographicCard> {
   }
 
   String cleanDescription(String text) {
-  return text.replaceAll(RegExp(r'<\/?p>'), '').trim();
-}
-
+    return text.replaceAll(RegExp(r'<\/?.*?>'), '').trim();
+  }
 
   Future<void> downloadImage(BuildContext context, String imgUrl) async {
     final status = await Permission.storage.request();
@@ -262,4 +282,3 @@ class _InfographicCardState extends State<InfographicCard> {
     );
   }
 }
-
