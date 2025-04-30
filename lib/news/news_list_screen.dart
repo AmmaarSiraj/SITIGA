@@ -4,6 +4,9 @@ import '../components/appbar.dart';
 import './news_service.dart';
 import 'news_header.dart';
 import '../components/next_page.dart';
+import '../components/bottom_navigation_bar.dart'; // <-- Tambahkan ini
+import '../MenuNav/profil_bps.dart'; // Jika ingin navigasi ke halaman lain
+import '../MenuNav/profil_developer.dart'; // Jika perlu
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -17,8 +20,9 @@ class _NewsListScreenState extends State<NewsListScreen> {
   int currentPage = 1;
   int totalPages = 1;
   final int itemsPerPage = 10;
-
   final ScrollController _scrollController = ScrollController();
+
+  int _selectedIndex = 4; // Index 4 untuk "Lainnya"
 
   @override
   void initState() {
@@ -39,7 +43,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       final fetchedList = await NewsService.fetchNews(page);
       cachedNews[page] = fetchedList;
 
-      final totalCount = 190; // ideally from API
+      final totalCount = 190;
       setState(() {
         newsList = fetchedList;
         totalPages = (totalCount / itemsPerPage).ceil();
@@ -57,6 +61,32 @@ class _NewsListScreenState extends State<NewsListScreen> {
       isLoading = true;
     });
     fetchNews(page);
+  }
+
+  void _onNavBarTapped(int index) {
+    if (index == 4) {
+      // index 4 adalah "Lainnya", tidak navigasi langsung
+      setState(() {
+        _selectedIndex = index;
+      });
+    } else {
+      // Lakukan navigasi ke halaman lain sesuai index
+      // Gantilah sesuai kebutuhan aplikasi kamu
+      switch (index) {
+        case 0:
+          Navigator.pushNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushNamed(context, '/infografis');
+          break;
+        case 2:
+          Navigator.pushNamed(context, '/tabel');
+          break;
+        case 3:
+          Navigator.pushNamed(context, '/publikasi');
+          break;
+      }
+    }
   }
 
   @override
@@ -138,22 +168,20 @@ class _NewsListScreenState extends State<NewsListScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 8.0),
                                       child: Text(
-                                        item['rl_date']?.toString() ??
-                                            "Unknown Date",
+                                        item['rl_date']?.toString() ?? "Unknown Date",
                                         style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[600]),
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 4),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        item['title']?.toString() ??
-                                            "No Title",
+                                        item['title']?.toString() ?? "No Title",
                                         maxLines: 2,
-                                        overflow:
-                                            TextOverflow.ellipsis,
+                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -180,6 +208,10 @@ class _NewsListScreenState extends State<NewsListScreen> {
                 ),
               ],
             ),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onNavBarTapped,
+      ),
     );
   }
 }

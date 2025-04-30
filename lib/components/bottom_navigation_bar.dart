@@ -77,9 +77,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
   }
 
   Widget _buildMoreNavItem(BuildContext context) {
+    final bool isActive = currentIndex == 4; // Set index 4 untuk "Lainnya"
     return GestureDetector(
       onTap: () {
-        // Pass the currentIndex to the MoreMenu
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -99,23 +99,29 @@ class CustomBottomNavigationBar extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: const BoxDecoration(
-              color: Colors.transparent,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? const Color.fromARGB(255, 101, 149, 153)
+                  : Colors.transparent,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.menu, // hamburger icon
+            child: Icon(
+              Icons.menu,
               size: 24,
-              color: Color.fromARGB(255, 45, 67, 69),
+              color: isActive
+                  ? Colors.white
+                  : const Color.fromARGB(255, 45, 67, 69),
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             "Lainnya",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 10,
-              color: Color.fromARGB(255, 40, 40, 40),
+              color: isActive
+                  ? const Color.fromARGB(255, 45, 67, 69)
+                  : const Color.fromARGB(255, 40, 40, 40),
             ),
           ),
         ],
@@ -188,9 +194,7 @@ class _MoreMenuState extends State<MoreMenu> {
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
@@ -199,7 +203,7 @@ class _MoreMenuState extends State<MoreMenu> {
                 const Icon(Icons.newspaper, color: Colors.white, size: 20),
                 "Berita",
                 () {
-                  widget.onTap(3); // Set the index to 3 for "Berita"
+                  widget.onTap(4); // Set index 4 untuk aktifkan tombol "Lainnya"
                   Navigator.pop(context);
                   Navigator.push(
                     context,
@@ -223,8 +227,8 @@ class _MoreMenuState extends State<MoreMenu> {
                     shape: BoxShape.circle,
                   ),
                   child: const Center(
-                    child:
-                        Icon(Icons.info_outline, color: Colors.white, size: 20),
+                    child: Icon(Icons.info_outline,
+                        color: Colors.white, size: 20),
                   ),
                 ),
                 title: Row(
@@ -257,7 +261,7 @@ class _MoreMenuState extends State<MoreMenu> {
                       ),
                     );
                   },
-                  margin: const EdgeInsets.only(left: 32), // Menjorok ke dalam
+                  margin: const EdgeInsets.only(left: 32),
                 ),
                 _buildMenuItem(
                   const Icon(Icons.person, color: Colors.white, size: 20),
@@ -271,7 +275,7 @@ class _MoreMenuState extends State<MoreMenu> {
                       ),
                     );
                   },
-                  margin: const EdgeInsets.only(left: 32), // Menjorok ke dalam
+                  margin: const EdgeInsets.only(left: 32),
                 ),
               ],
               const Divider(),
