@@ -4,9 +4,7 @@ import '../components/appbar.dart';
 import './news_service.dart';
 import 'news_header.dart';
 import '../components/next_page.dart';
-import '../components/bottom_navigation_bar.dart'; // <-- Tambahkan ini
-import '../MenuNav/profil_bps.dart'; // Jika ingin navigasi ke halaman lain
-import '../MenuNav/profil_developer.dart'; // Jika perlu
+import './filter_news.dart';
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -20,9 +18,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
   int currentPage = 1;
   int totalPages = 1;
   final int itemsPerPage = 10;
-  final ScrollController _scrollController = ScrollController();
 
-  int _selectedIndex = 4; // Index 4 untuk "Lainnya"
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -43,7 +40,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       final fetchedList = await NewsService.fetchNews(page);
       cachedNews[page] = fetchedList;
 
-      final totalCount = 190;
+      final totalCount = 190; // ideally from API
       setState(() {
         newsList = fetchedList;
         totalPages = (totalCount / itemsPerPage).ceil();
@@ -63,32 +60,6 @@ class _NewsListScreenState extends State<NewsListScreen> {
     fetchNews(page);
   }
 
-  void _onNavBarTapped(int index) {
-    if (index == 4) {
-      // index 4 adalah "Lainnya", tidak navigasi langsung
-      setState(() {
-        _selectedIndex = index;
-      });
-    } else {
-      // Lakukan navigasi ke halaman lain sesuai index
-      // Gantilah sesuai kebutuhan aplikasi kamu
-      switch (index) {
-        case 0:
-          Navigator.pushNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushNamed(context, '/infografis');
-          break;
-        case 2:
-          Navigator.pushNamed(context, '/tabel');
-          break;
-        case 3:
-          Navigator.pushNamed(context, '/publikasi');
-          break;
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,18 +73,40 @@ class _NewsListScreenState extends State<NewsListScreen> {
                   totalPages: totalPages,
                   onPageChanged: changePage,
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FilterNewsScreen(query: ''),
+                        ),
+                      );
+                    },
+                    child: AbsorbPointer(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search news...',
+                          prefixIcon: Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     controller: _scrollController,
                     child: Column(
                       children: [
                         GridView.builder(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 200,
                             mainAxisSpacing: 8,
                             crossAxisSpacing: 8,
@@ -127,10 +120,8 @@ class _NewsListScreenState extends State<NewsListScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        NewsDetailScreen(
-                                      newsId: item['news_id']
-                                          .toString(),
+                                    builder: (context) => NewsDetailScreen(
+                                      newsId: item['news_id'].toString(),
                                     ),
                                   ),
                                 );
@@ -143,8 +134,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
                                 clipBehavior: Clip.antiAlias,
                                 child: Column(
                                   mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
                                       child: item['picture'] != null
@@ -152,27 +142,17 @@ class _NewsListScreenState extends State<NewsListScreen> {
                                               item['picture'],
                                               width: double.infinity,
                                               fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (ctx, err, st) =>
-                                                      Container(
-                                                color:
-                                                    Colors.grey[300],
-                                              ),
+                                              errorBuilder: (ctx, err, st) =>
+                                                  Container(color: Colors.grey[300]),
                                             )
-                                          : Container(
-                                              color: Colors.grey[300],
-                                            ),
+                                          : Container(color: Colors.grey[300]),
                                     ),
                                     const SizedBox(height: 4),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                       child: Text(
                                         item['rl_date']?.toString() ?? "Unknown Date",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                                       ),
                                     ),
                                     const SizedBox(height: 4),
@@ -208,10 +188,6 @@ class _NewsListScreenState extends State<NewsListScreen> {
                 ),
               ],
             ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onNavBarTapped,
-      ),
     );
   }
 }
