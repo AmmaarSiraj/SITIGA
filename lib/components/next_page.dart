@@ -36,7 +36,7 @@ class NextPage extends StatelessWidget {
               child: currentPage > 1
                   ? ElevatedButton(
                       onPressed: () => _changePage(currentPage - 1),
-                      child: const Text('Prev Page'),
+                      child: const Icon(Icons.chevron_left), // Ikon panah kiri
                     )
                   : const SizedBox(), // Tetap jaga posisi kosong
             ),
@@ -57,7 +57,7 @@ class NextPage extends StatelessWidget {
               child: currentPage < totalPages
                   ? ElevatedButton(
                       onPressed: () => _changePage(currentPage + 1),
-                      child: const Text('Next Page'),
+                      child: const Icon(Icons.chevron_right), // Ikon panah kanan
                     )
                   : const SizedBox(), // Tetap jaga posisi kosong
             ),
