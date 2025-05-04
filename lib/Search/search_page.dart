@@ -277,6 +277,7 @@ Future<void> _performSearch() async {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+<<<<<<< HEAD
             Align(
               alignment: Alignment.topLeft,
               child: Row(
@@ -288,6 +289,23 @@ Future<void> _performSearch() async {
                 ],
               ),
             ),
+=======
+          Align(
+  alignment: Alignment.topLeft,
+  child: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Icons.location_on, size: 18, color: Colors.grey[700]),
+      SizedBox(width: 4),
+      Text(
+        "BPS Kota Salatiga",
+        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+      ),
+    ],
+  ),
+),
+
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
             const SizedBox(height: 16),
             Row(
               children: [

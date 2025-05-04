@@ -164,4 +164,3 @@ class _PartPublikasiState extends State<PartPublikasi> {
     );
   }
 }
-

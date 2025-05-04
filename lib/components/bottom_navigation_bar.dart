@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import '../components/lainnya_nav.dart';
+=======
+import 'lainnya_nav.dart'; // Import untuk menu lainnya
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
 
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
@@ -20,16 +24,23 @@ class CustomBottomNavigationBar extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+<<<<<<< HEAD
           // Background bar
+=======
+          // Background
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
           Positioned.fill(
-            bottom: 0,
             child: Container(
+<<<<<<< HEAD
               height: 70,
+=======
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
               decoration: const BoxDecoration(
                 color: Color.fromARGB(20, 218, 217, 217),
               ),
             ),
           ),
+<<<<<<< HEAD
 
           // Tombol-tombol navigasi dengan posisi terukur
           _buildNavItem(context, Icons.table_view_sharp, "Tabel", 2, screenWidth * 0.1),
@@ -38,17 +49,37 @@ _buildNavItem(context, Icons.home, "Beranda", 0, screenWidth * 0.5, isCenter: tr
 _buildNavItem(context, Icons.article, "Publikasi", 3, screenWidth * 0.72),
 _buildNavItem(context, Icons.menu, "Lainnya", 5, screenWidth * 0.9, isModal: true),
 
+=======
+          _buildNavItem(context, Icons.table_view_sharp, "Tabel", 2, screenWidth * 0.1),
+          _buildNavItem(context, Icons.image, "Infografis", 1, screenWidth * 0.28),
+          _buildNavItem(context, Icons.home, "Beranda", 0, screenWidth * 0.5, isCenter: true),
+          _buildNavItem(context, Icons.article, "Publikasi", 3, screenWidth * 0.72),
+          _buildNavItem(context, Icons.menu, "Lainnya", 5, screenWidth * 0.9, isMoreMenu: true),
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
         ],
       ),
     );
   }
 
+<<<<<<< HEAD
   Widget _buildNavItem(BuildContext context, IconData icon, String label, int index, double left,
       {bool isCenter = false, bool isModal = false}) {
+=======
+  Widget _buildNavItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    int index,
+    double left, {
+    bool isCenter = false,
+    bool isMoreMenu = false,
+  }) {
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
     final bool isActive = currentIndex == index;
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 300),
+<<<<<<< HEAD
       bottom: isActive ? 20 : 10,
       left: left - 30,
       child: GestureDetector(
@@ -60,6 +91,24 @@ _buildNavItem(context, Icons.menu, "Lainnya", 5, screenWidth * 0.9, isModal: tru
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               builder: (context) => LainnyaNavScreen(onTap: onTap),
+=======
+      bottom: isActive ? 20 : 10, // Efek pop up
+      left: left - 30, // Pusatkan tiap item (lebar item 60)
+      child: GestureDetector(
+        onTap: () {
+          if (isMoreMenu) {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.white,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (context) => MoreMenu(
+                currentIndex: currentIndex,
+                onTap: onTap,
+              ),
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
             );
           } else {
             onTap(index);
@@ -68,6 +117,7 @@ _buildNavItem(context, Icons.menu, "Lainnya", 5, screenWidth * 0.9, isModal: tru
         child: SizedBox(
           width: 60,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 40,
@@ -75,7 +125,11 @@ _buildNavItem(context, Icons.menu, "Lainnya", 5, screenWidth * 0.9, isModal: tru
                 decoration: BoxDecoration(
                   color: isActive
                       ? const Color.fromARGB(255, 101, 149, 153)
+<<<<<<< HEAD
                       : const Color.fromARGB(0, 255, 255, 255),
+=======
+                      : Colors.transparent,
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import '../publikasi/publikasi_service.dart';  // Import service publikasi
-import '../news/news_service.dart';      // Import service berita
+import '../publikasi/publikasi_service.dart';  
+import '../news/news_service.dart';      
 import '../infographic/infographic_service.dart';
 import '../net/network.dart';
 
 class DataProvider with ChangeNotifier {
+<<<<<<< HEAD
+=======
+  
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
   List<Map<String, dynamic>> allInfographics = [];
   List<Map<String, dynamic>> allSubjects = [];
   List<Map<String, dynamic>> allInfographicData = [];
@@ -15,6 +19,7 @@ class DataProvider with ChangeNotifier {
     isLoading = true;
     notifyListeners();
 
+<<<<<<< HEAD
     final fetchInfographicsFuture = fetchAllInfographics(totalPages: 2);
       final fetchSubjectsFuture = fetchSubjects();
       final fetchInfographicDataFuture = fetchInfographicData();
@@ -26,6 +31,16 @@ class DataProvider with ChangeNotifier {
         fetchInfographicDataFuture,
       ]);
       
+=======
+    
+    final fetchInfographics = fetchAllInfographics(totalPages: 2);
+    final fetchSubjectsFuture = fetchSubjects();
+    
+
+    final results = await Future.wait([ fetchInfographics, fetchSubjectsFuture, ]);
+
+    
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
     allInfographics = results[0];
     allSubjects = results[1];
     allInfographicData = results[2];
@@ -50,7 +65,11 @@ Future<void> loadAllData() async {
 
     final results = await Future.wait([fetchPublications, fetchNews, fetchInfographics]);
 
+<<<<<<< HEAD
     
+=======
+   
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
     allInfographics = results[2];
 
     notifyListeners();

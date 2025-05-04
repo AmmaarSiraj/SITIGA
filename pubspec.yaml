@@ -25,9 +25,14 @@ dependencies:
   flutter_html: ^3.0.0-beta.2
   html_unescape: ^2.0.0
   provider: ^6.1.4
+  font_awesome_flutter: ^10.1.0
   flutter_svg: ^2.0.7
+<<<<<<< HEAD
   font_awesome_flutter: ^10.7.0
   smooth_page_indicator: ^1.1.0
+=======
+  
+>>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
 
 dev_dependencies:
   flutter_test:

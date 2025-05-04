@@ -12,10 +12,13 @@ class PartInfografis extends StatelessWidget {
     final infographicList = Provider.of<DataProvider>(context).allInfographics;
 
     if (infographicList.isEmpty) {
-      return const Center(child: CircularProgressIndicator()); // Loading kecil kalau datanya belum ada
+      return const Center(
+          child:
+              CircularProgressIndicator()); // Loading kecil kalau datanya belum ada
     }
 
-    final top5Infographics = infographicList.take(5).toList(); // Ambil 5 teratas
+    final top5Infographics =
+        infographicList.take(5).toList(); // Ambil 5 teratas
 
     return Column(
       children: [
