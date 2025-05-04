@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../components/appbar.dart';
+import '../components/appbar.dart';
+import '../components/SectionHeader.dart';
 import '../publikasi/publikasi_grid.dart';
-import 'publikasi_header.dart';
-import 'publikasi_pencarian_filter.dart';
+import '../publikasi/publikasi_filter.dart';
 import '../components/next_page.dart';
 import '../publikasi/publikasi_service.dart';
-
+import '../publikasi/publikasi_pencarian.dart'; // Tambahan penting
 
 class PublicationListScreen extends StatefulWidget {
   @override
@@ -13,24 +13,19 @@ class PublicationListScreen extends StatefulWidget {
 }
 
 class _PublicationListScreenState extends State<PublicationListScreen> {
-  static const int TOTAL_SERVER_PAGES = 24; // Jumlah page di API
+  static const int TOTAL_SERVER_PAGES = 24;
   final ScrollController _scrollController = ScrollController();
 
-  // Cache per-page
   Map<int, List<Map<String, dynamic>>> cachedPublications = {};
-  // Semua data beserta hasil filter global
   List<Map<String, dynamic>> allPublications = [];
   List<Map<String, dynamic>> filteredAllData = [];
-
   List<Map<String, dynamic>> pagedPublications = [];
-
 
   bool isLoading = true;
   int currentPage = 1;
   int totalPages = TOTAL_SERVER_PAGES;
   final int itemsPerPage = 12;
 
-  String searchQuery = "";
   String selectedFilter = '(Semua)';
 
   @override
@@ -39,25 +34,19 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     _loadPage(1);
   }
 
-  /// Load satu page saja jika filter = Semua,
-  /// atau load semua pages + filter jika filter aktif
   Future<void> _loadPage(int page) async {
-  setState(() => isLoading = true);
+    setState(() => isLoading = true);
 
-  // Kalau ada searchQuery atau filter != Semua, fetch semua pages dan apply global
-  if (searchQuery.isNotEmpty || selectedFilter != '(Semua)') {
-    await _fetchAllPages();
-    _applyGlobalFilterAndPaginate(page);
+    if (selectedFilter != '(Semua)') {
+      await _fetchAllPages();
+      _applyGlobalFilterAndPaginate(page);
+    } else {
+      await _fetchAndCachePage(page);
+      _applyLocalFilterAndPaginate(page);
+    }
+
+    setState(() => isLoading = false);
   }
-  else {
-    // normal: fetch & filter satu page
-    await _fetchAndCachePage(page);
-    _applyLocalFilterAndPaginate(page);
-  }
-
-  setState(() => isLoading = false);
-}
-
 
   Future<void> _fetchAndCachePage(int page) async {
     if (!cachedPublications.containsKey(page)) {
@@ -77,41 +66,27 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     }
   }
 
-  // Hanya filter & paginate dari satu page saja (tanpa fetch ulang)
   void _applyLocalFilterAndPaginate(int page) {
     final pageData = cachedPublications[page]!;
-    filteredAllData = _applySearchAndFilter(pageData);
+    filteredAllData = _applyFilter(pageData);
 
     totalPages = TOTAL_SERVER_PAGES;
     currentPage = page;
     pagedPublications = filteredAllData;
   }
 
-  // Filter global & buat pagination slice
   void _applyGlobalFilterAndPaginate(int page) {
-    filteredAllData = _applySearchAndFilter(allPublications);
+    filteredAllData = _applyFilter(allPublications);
 
     totalPages = (filteredAllData.length / itemsPerPage).ceil();
     currentPage = page;
 
     final start = (page - 1) * itemsPerPage;
-    pagedPublications = filteredAllData
-        .skip(start)
-        .take(itemsPerPage)
-        .toList();
+    pagedPublications = filteredAllData.skip(start).take(itemsPerPage).toList();
   }
 
-  List<Map<String, dynamic>> _applySearchAndFilter(List<Map<String, dynamic>> data) {
+  List<Map<String, dynamic>> _applyFilter(List<Map<String, dynamic>> data) {
     return data.where((pub) {
-      final titleMatch = pub['title']
-          .toString()
-          .toLowerCase()
-          .contains(searchQuery.toLowerCase());
-
-      if (selectedFilter.toLowerCase() == 'semua' || selectedFilter == '(Semua)') {
-        return titleMatch;
-      }
-
       final rlDate = pub['rl_date']?.toString() ?? '';
       int? year;
       try {
@@ -123,12 +98,13 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
       bool filterMatch;
       if (selectedFilter == '<2020') {
         filterMatch = year != null && year < 2020;
+      } else if (selectedFilter == '(Semua)') {
+        filterMatch = true;
       } else {
         final filterYear = int.tryParse(selectedFilter) ?? -1;
         filterMatch = year != null && year == filterYear;
       }
-
-      return titleMatch && filterMatch;
+      return filterMatch;
     }).toList();
   }
 
@@ -136,21 +112,17 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
     _loadPage(page).then((_) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
+          _scrollController.animateTo(0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut);
         }
       });
     });
   }
 
   void applyFilters(String newFilter) {
-
     setState(() {
       selectedFilter = newFilter;
-      searchQuery = "";       // kalau mau reset search juga
     });
     _loadPage(1);
   }
@@ -163,23 +135,55 @@ class _PublicationListScreenState extends State<PublicationListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                const PublikasiHeader(),
-                PublikasiPencarianFilter(
-                  searchQuery: searchQuery,
-                  selectedFilter: selectedFilter,
-                  currentPage: currentPage,
-                  totalPages: totalPages,
-                  onSearchChanged: (value) {
-  setState(() => searchQuery = value);
-  _loadPage(1);
-},
+                SectionHeader(title: "Publikasi"),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Kolom Pencarian
+                      Expanded(
+                        flex: 6,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    PencarianPublikasiScreen(query: ''),
+                              ),
+                            );
+                          },
+                          child: AbsorbPointer(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Pencarian Publikasi...',
+                                prefixIcon: Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 14),
+                              ),
+                              style: TextStyle(fontSize: 16, height: 1.2),
+                            ),
+                          ),
+                        ),
+                      ),
 
-                  onFilterChanged: (value) {
-                    applyFilters(value);
-                  },
-                  onPageChanged: (page) {
-                    changePage(page);
-                  },
+                      const SizedBox(width: 12),
+
+                      // Filter + Halaman
+                      PublikasiPencarianFilter(
+                        selectedFilter: selectedFilter,
+                        currentPage: currentPage,
+                        totalPages: totalPages,
+                        onFilterChanged: (value) => applyFilters(value),
+                        onPageChanged: changePage,
+                      ),
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: SingleChildScrollView(

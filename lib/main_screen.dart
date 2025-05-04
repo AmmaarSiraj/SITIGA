@@ -21,6 +21,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   late int _selectedIndex;
 
+  Offset _fabPosition = Offset(300, 500); // Posisi awal tombol search
+
   final List<Widget> _screens = [
     HomeScreen(),
     InfographicListScreen(),
@@ -38,9 +40,6 @@ class _MainScreenState extends State<MainScreen> {
       dataProvider.loadAllData();
     });
   }
-  
-
-  
 
   void _onTabTapped(int index) {
     setState(() {
@@ -50,30 +49,60 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-        floatingActionButton: Padding(
-  padding: const EdgeInsets.only(bottom: 70.0), // naikkan 50 pixel dari bawah
-  child: FloatingActionButton(
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SearchPage()),
-      );
-    },
-    backgroundColor: Color.fromARGB(255, 101, 149, 153),
-    child: const Icon(Icons.search),
-  ),
-),
-floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    final Size screenSize = MediaQuery.of(context).size;
 
+    return Scaffold(
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: _selectedIndex,
+            children: _screens,
+          ),
+          Positioned(
+            left: _fabPosition.dx,
+            top: _fabPosition.dy,
+            child: Draggable(
+              feedback: _buildFab(),
+              childWhenDragging: Container(), // kosong pas dragging
+              onDragEnd: (details) {
+                setState(() {
+                  double newX = details.offset.dx;
+                  double newY = details.offset.dy;
+
+                  // Batas kiri
+                  if (newX < 0) newX = 0;
+                  // Batas kanan
+                  if (newX > screenSize.width - 56) newX = screenSize.width - 56; // 56 = diameter FloatingActionButton
+                  // Batas atas
+                  if (newY < 0) newY = 0;
+                  // Batas bawah
+                  if (newY > screenSize.height - 56 - 80) newY = screenSize.height - 56 - 80; // 80 kira-kira untuk padding + bottomNavigationBar
+
+                  _fabPosition = Offset(newX, newY);
+                });
+              },
+              child: _buildFab(),
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onTabTapped,
       ),
+    );
+  }
+
+  Widget _buildFab() {
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SearchPage()),
+        );
+      },
+      backgroundColor: Color.fromARGB(255, 101, 149, 153),
+      child: const Icon(Icons.search),
     );
   }
 }

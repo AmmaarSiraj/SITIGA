@@ -12,9 +12,10 @@ import '../providers/data_provider.dart'; // Import provider!
 
 class HomeScreen extends StatelessWidget {
   final List<String> carouselImages = [
-    'assets/images/grup1.png',
-    'assets/images/grup4.png',
-    'assets/images/grup3.png',
+    'assets/images/1.png',
+    'assets/images/2.png',
+    'assets/images/3.png',
+    'assets/images/4.png',
   ];
 
   @override
@@ -53,10 +54,10 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            StatisticSection(), // Pastikan dia ambil dari Provider juga
-            PartInfografis(),    // Pastikan ambil dari Provider juga
-            PartNews(),          // Pastikan ambil dari Provider juga
-            PartPublikasi(),     // Pastikan ambil dari Provider juga
+            StatisticSection(), 
+            PartInfografis(),    
+            PartNews(),                     
+            PartPublikasi(),     
           ],
         ),
       ),

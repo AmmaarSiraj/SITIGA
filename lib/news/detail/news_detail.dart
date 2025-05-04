@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:html/parser.dart';
-import '../../main_screen.dart';
 
 class NewsDetailScreen extends StatefulWidget {
   final String newsId;
@@ -64,7 +63,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 246, 246),
+      backgroundColor:Colors.white,
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : newsDetail == null
@@ -117,12 +116,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                       leading: IconButton(
                         icon: Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => MainScreen(initialIndex: 4)),
-                            (route) => false,
-                          );
+                          Navigator.pop(context);
                         },
                       ),
                     ),
@@ -132,49 +126,49 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // --- Konten berita utama ---
                             Text(
                               cleanNewsContent(newsDetail!['news'] ?? ""),
                               textAlign: TextAlign.justify,
                               style: TextStyle(
-                                  fontSize: 16,
-                                  height: 1.6,
-                                  color: Colors.black87),
-                            ),
-                            SizedBox(height: 20),
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Color.fromARGB(
-                                    255, 0, 144, 221), // Warna latar belakang
-                                borderRadius: BorderRadius.circular(
-                                    8), // Border agar tidak terlalu kaku
+                                fontSize: 16,
+                                height: 1.8,
+                                color: Colors.black87,
                               ),
-                              child: Center(
-                                child: Text(
-                                  "Related News",
+                            ),
+                            SizedBox(height: 30),
+
+                            // --- Related News header ---
+                            Row(
+                              children: [
+                                Icon(Icons.newspaper,
+                                    color: Color.fromARGB(255, 0, 144, 221)),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Berita Terkait",
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors
-                                        .white70, // Warna teks lebih kontras
+                                    color: Colors.black87,
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 16),
+
+                            // --- Related News Cards ---
                             Container(
-                              height: 180,
+                              height: 200,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: relatedNews.length,
                                 itemBuilder: (context, index) {
                                   return Padding(
-                                    padding: const EdgeInsets.only(right: 10),
+                                    padding: const EdgeInsets.only(right: 12),
                                     child: NewsCard(
                                       news: relatedNews[index],
                                       onTap: () {
-                                        Navigator.push(
+                                        Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
@@ -212,69 +206,65 @@ class NewsCard extends StatelessWidget {
     String title = news['title'] ?? 'No Title';
     String date = news['rl_date'] ?? 'Unknown Date';
 
-    TextStyle titleStyle = TextStyle(
-        color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold);
-
-    // Menggunakan TextPainter untuk menghitung jumlah baris
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: title, style: titleStyle),
-      maxLines: 2,
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: 144); // Sesuaikan dengan lebar card
-
-    bool isSingleLine = textPainter.didExceedMaxLines ==
-        false; // Jika tidak lebih dari satu baris
-
     return InkWell(
       onTap: onTap,
       child: Container(
         width: 160,
         decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
-            BoxShadow(color: Colors.black26, blurRadius: 5, spreadRadius: 2)
+            BoxShadow(
+                color: Colors.black12, blurRadius: 6, offset: Offset(0, 3))
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Stack(
-            children: [
-              Image.network(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Gambar
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.network(
                 news['picture'] ?? '',
                 width: 160,
-                height: 110,
+                height: 100,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 100,
+                    color: Colors.grey[300],
+                  );
+                },
               ),
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  width: 160,
-                  padding: EdgeInsets.all(8),
-                  color: Colors.black.withOpacity(0.7),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: titleStyle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(
-                          height: isSingleLine
-                              ? 20
-                              : 4), // Tambahkan lebih banyak jarak jika satu baris
-                      Text(
-                        date,
-                        style: TextStyle(color: Colors.white70, fontSize: 10),
-                      ),
-                    ],
+            ),
+            // Konten Teks
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Colors.black87,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                  SizedBox(height: 6),
+                  Text(
+                    date,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -54,7 +54,7 @@ class _PartPublikasiState extends State<PartPublikasi> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -64,10 +64,10 @@ class _PartPublikasiState extends State<PartPublikasi> {
             children: [
               Row(
                 children: [
-                  Container(width: 4, height: 20, color: Colors.blue),
-                  const SizedBox(width: 6),
+                  Container(width: 4, height: 24, color: Colors.blue),
+                  const SizedBox(width: 8),
                   Text(
-                    'Publikasi',
+                    "Publikasi",
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Untuk mengunci orientasi
 import 'package:provider/provider.dart';
 import 'components/splash_screen.dart';
-import 'providers/data_provider.dart'; // <- Tambahkan ini
+import 'providers/data_provider.dart'; // Provider utama
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Mengunci orientasi ke portrait only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(const MyApp());
 }
 

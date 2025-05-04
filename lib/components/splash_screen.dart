@@ -19,7 +19,7 @@ void initState() {
   super.initState();
   _initApp();
   // Tambahkan timer 4 detik
-  Future.delayed(Duration(seconds: 4), () {
+  Future.delayed(Duration(seconds: 5), () {
     _isVideoFinished = true;
     _tryNavigate();
   });

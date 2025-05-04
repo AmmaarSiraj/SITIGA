@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'detail/news_detail.dart';
 import '../components/appbar.dart';
 import './news_service.dart';
-import 'news_header.dart';
+import '../components/SectionHeader.dart';
 import '../components/next_page.dart';
+import '../news/pencarian_news.dart';
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -39,9 +40,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       final fetchedList = await NewsService.fetchNews(page);
       cachedNews[page] = fetchedList;
 
-      // Simulasikan total halaman dari response jika kamu punya totalCount
-      // Gantilah nilai totalCount di bawah sesuai dari server jika tersedia
-      final totalCount = 190; // <-- Simulasi jumlah total berita
+      final totalCount = 150; // ideally from API
       setState(() {
         newsList = fetchedList;
         totalPages = (totalCount / itemsPerPage).ceil();
@@ -64,20 +63,71 @@ class _NewsListScreenState extends State<NewsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: buildAppBar(),
-        body: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(children: [
-                NewsHeader(
-  currentPage: currentPage,
-  totalPages: totalPages,
-  onPageChanged: (page) {
-    setState(() {
-      currentPage = page;
-      isLoading = true;
-    });
-    fetchNews(page);
-  },
+      appBar: buildAppBar(),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                SectionHeader(title: "Berita"),
+                Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+  child: Row(
+    children: [
+      // Kolom pencarian berita
+      Expanded(
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FilterNewsScreen(query: ''),
+              ),
+            );
+          },
+          child: AbsorbPointer(
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Pencarian Berita...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      const SizedBox(width: 12),
+      // Dropdown untuk halaman
+      SizedBox(
+        width: 60,
+        child: DropdownButtonFormField<int>(
+          value: currentPage,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          onChanged: totalPages == 1
+              ? null
+              : (value) {
+                  if (value != null) changePage(value);
+                },
+          items: List.generate(
+            totalPages,
+            (index) => DropdownMenuItem(
+              value: index + 1,
+              child: Center(child: Text("${index + 1}")),
+            ),
+          ),
+          menuMaxHeight: 200,
+        ),
+      ),
+    ],
+  ),
 ),
 
                 Expanded(
@@ -85,157 +135,92 @@ class _NewsListScreenState extends State<NewsListScreen> {
                     controller: _scrollController,
                     child: Column(
                       children: [
-                        ListView.builder(
+                        GridView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                           shrinkWrap: true,
-                          physics:
-                              const NeverScrollableScrollPhysics(), // Biar tidak scroll sendiri
-                          itemCount: (newsList.length / 2).ceil(),
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 200,
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                            childAspectRatio: 0.90,
+                          ),
+                          itemCount: newsList.length,
                           itemBuilder: (context, index) {
-                            final firstIndex = index * 2;
-                            final secondIndex = firstIndex + 1;
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: NewsCard(
-                                      news: newsList[firstIndex],
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                NewsDetailScreen(
-                                              newsId: newsList[firstIndex]
-                                                      ['news_id']
-                                                  .toString(),
-                                            ),
-                                          ),
-                                        );
-                                      },
+                            final item = newsList[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => NewsDetailScreen(
+                                      newsId: item['news_id'].toString(),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: secondIndex < newsList.length
-                                        ? NewsCard(
-                                            news: newsList[secondIndex],
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      NewsDetailScreen(
-                                                    newsId:
-                                                        newsList[secondIndex]
-                                                                ['news_id']
-                                                            .toString(),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          )
-                                        : Container(),
-                                  ),
-                                ],
+                                );
+                              },
+                              child: Card(
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: item['picture'] != null
+                                          ? Image.network(
+                                              item['picture'],
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (ctx, err, st) =>
+                                                  Container(color: Colors.grey[300]),
+                                            )
+                                          : Container(color: Colors.grey[300]),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Text(
+                                        item['rl_date']?.toString() ?? "Unknown Date",
+                                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        item['title']?.toString() ?? "No Title",
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           },
                         ),
-                        const SizedBox(
-                            height: 20), // kasih jarak dikit biar nggak nempel
+                        const SizedBox(height: 20),
                         NextPage(
-  currentPage: currentPage,
-  totalPages: totalPages,
-  onPageChanged: (page) {
-    setState(() {
-      currentPage = page;
-      isLoading = true;
-    });
-    fetchNews(page);
-  },
-  scrollController: _scrollController, // kirim scrollController
-),
-
-                        const SizedBox(
-                            height: 20), // opsional, buat jarak bawah
+                          currentPage: currentPage,
+                          totalPages: totalPages,
+                          onPageChanged: changePage,
+                          scrollController: _scrollController,
+                        ),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
-                )
-              ]),
-              );
-  }
-}
-
-class NewsCard extends StatelessWidget {
-  final Map<String, dynamic> news;
-  final VoidCallback? onTap;
-
-  const NewsCard({required this.news, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Card(
-        color: Colors.white,
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            news['picture'] != null
-                ? ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: Image.network(
-                      news['picture'],
-                      height: 120,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(12)),
-                    ),
-                  ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    news['title']?.toString() ?? "No Title",
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    news['rl_date']?.toString() ?? "Unknown Date",
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                  const SizedBox(height: 8),
-                  const Row(
-                    children: [
-                      Spacer(),
-                      Icon(Icons.share, size: 16, color: Colors.grey),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
     );
   }
 }

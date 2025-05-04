@@ -28,10 +28,19 @@ class _PartNewsState extends State<PartNews> {
     });
   }
 
+  String cleanHtmlTags(String htmlText) {
+  // Hapus <p>, </p>, dan <p class="MsoNormal"> menggunakan RegExp
+  return htmlText
+      .replaceAll(RegExp(r'<\/?p.*?>'), '')
+      .replaceAll(RegExp(r'&nbsp;'), ' ')
+      .trim();
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -68,7 +77,7 @@ class _PartNewsState extends State<PartNews> {
           isLoading
               ? const Center(child: CircularProgressIndicator())
               : SizedBox(
-                  height: 280,
+                  height: 250,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: newsList.length,
@@ -122,11 +131,12 @@ class _PartNewsState extends State<PartNews> {
                                   style: const TextStyle(fontSize: 10)),
                               const SizedBox(height: 4),
                               Text(
-                                item['news'] ?? '',
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 12),
-                              ),
+  cleanHtmlTags(item['news'] ?? ''),
+  maxLines: 3,
+  overflow: TextOverflow.ellipsis,
+  style: const TextStyle(fontSize: 12),
+),
+
                             ],
                           ),
                         ),
