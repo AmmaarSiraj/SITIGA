@@ -8,10 +8,7 @@ import 'detail/infographic_detail.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../providers/data_provider.dart';
-<<<<<<< HEAD
 import '../infographic/infografis_header.dart';
-=======
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
 import '../components/next_page.dart';
 
 class InfographicListScreen extends StatefulWidget {
@@ -49,7 +46,6 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-<<<<<<< HEAD
                 InfografisHeader(
                   currentPage: currentPage,
                   totalPages: totalPages,
@@ -78,96 +74,6 @@ class _InfographicListScreenState extends State<InfographicListScreen> {
   ),
 ),
   ],
-=======
-                Container(
-                  color: const Color(0xFFFFF6F6),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(width: 5, height: 40, color: Colors.blue),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Infografis",
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(Icons.location_on, size: 18, color: Colors.grey[700]),
-                                  const SizedBox(width: 4),
-                                  const Text(
-                                    "BPS Kota Salatiga",
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      DropdownButton<int>(
-                        value: currentPage,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        onChanged: (int? newPage) {
-                          if (newPage != null) changePage(newPage);
-                          _scrollController.animateTo(
-                            0,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeOut,
-                          );
-                        },
-                        items: List.generate(totalPages, (index) {
-                          int pageNumber = index + 1;
-                          return DropdownMenuItem(
-                            value: pageNumber,
-                            child: Text('Halaman $pageNumber'),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    child: Column(
-                      children: [
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.only(bottom: 16),
-                          itemCount: pagedInfographics.length,
-                          itemBuilder: (context, index) {
-                            final infographic = pagedInfographics[index];
-                            return InfographicCard(
-                              img: infographic['img'],
-                              title: infographic['title']?.toString() ?? "No Title",
-                              description: infographic['desc']?.toString() ?? "No Description",
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        NextPage(
-                          currentPage: currentPage,
-                          totalPages: totalPages,
-                          onPageChanged: (page) {
-                            changePage(page);
-                          },
-                          scrollController: _scrollController,
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
             ),
     );
   }
@@ -209,13 +115,9 @@ class _InfographicCardState extends State<InfographicCard> {
       ),
       maxLines: 2,
       textDirection: TextDirection.ltr,
-<<<<<<< HEAD
     )..layout(
         maxWidth:
             MediaQuery.of(context).size.width - 32); // 16 padding kiri + kanan
-=======
-    )..layout(maxWidth: MediaQuery.of(context).size.width - 32);
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
 
     if (textPainter.didExceedMaxLines) {
       setState(() {
@@ -225,11 +127,7 @@ class _InfographicCardState extends State<InfographicCard> {
   }
 
   String cleanDescription(String text) {
-<<<<<<< HEAD
     return text.replaceAll(RegExp(r'<\/?p>'), '').trim();
-=======
-    return text.replaceAll(RegExp(r'<\/?.*?>'), '').trim();
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
   }
 
   Future<void> downloadImage(BuildContext context, String imgUrl) async {

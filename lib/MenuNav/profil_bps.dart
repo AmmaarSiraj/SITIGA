@@ -89,8 +89,4 @@ class ProfilBPSPage extends StatelessWidget {
       ),
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965

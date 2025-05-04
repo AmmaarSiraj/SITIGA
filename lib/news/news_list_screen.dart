@@ -4,11 +4,7 @@ import '../components/appbar.dart';
 import './news_service.dart';
 import '../components/SectionHeader.dart';
 import '../components/next_page.dart';
-<<<<<<< HEAD
 import '../news/pencarian_news.dart';
-=======
-import './filter_news.dart';
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
 
 class NewsListScreen extends StatefulWidget {
   @override
@@ -44,11 +40,7 @@ class _NewsListScreenState extends State<NewsListScreen> {
       final fetchedList = await NewsService.fetchNews(page);
       cachedNews[page] = fetchedList;
 
-<<<<<<< HEAD
       final totalCount = 150; // ideally from API
-=======
-      final totalCount = 190; // ideally from API
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
       setState(() {
         newsList = fetchedList;
         totalPages = (totalCount / itemsPerPage).ceil();
@@ -76,7 +68,6 @@ class _NewsListScreenState extends State<NewsListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-<<<<<<< HEAD
                 SectionHeader(title: "Berita"),
                 Padding(
   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
@@ -139,37 +130,6 @@ class _NewsListScreenState extends State<NewsListScreen> {
   ),
 ),
 
-=======
-                NewsHeader(
-                  currentPage: currentPage,
-                  totalPages: totalPages,
-                  onPageChanged: changePage,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FilterNewsScreen(query: ''),
-                        ),
-                      );
-                    },
-                    child: AbsorbPointer(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search news...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
->>>>>>> 6848fdb5d042b3187a6ab30d123ccc3dbf5f0965
                 Expanded(
                   child: SingleChildScrollView(
                     controller: _scrollController,
